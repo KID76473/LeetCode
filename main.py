@@ -1,5 +1,5 @@
 from solution import Solution
 
-l = [-2,1,-3,4,-1,2,1,-5,4]
+llist = [0, 1, 0, 3, 2, 3]
 a = 1011
-print(Solution().climbStairs(4))
+print(Solution().lengthOfLIS(llist))

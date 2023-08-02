@@ -70,3 +70,26 @@ class Solution:
                 dp[x] = min(dp[x], dp[x - coin] + 1)
         return dp[amount] if dp[amount] != float('inf') else -1
 
+    # 300
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        dp = [1]
+        for i in range(len(nums)):
+            dp.append(1)
+            for j in range(i):
+                if nums[i] > nums[j]:
+                    dp[i] = max(dp[j] + 1, dp[i])
+        return max(dp)
+        # length = max_length = 1
+        # prev = nums[0]
+        # for i in range(0, len(nums) - 1):
+        #     if nums[i + 1] > nums[i]:
+        #         length += 1
+        #         prev = nums[i]
+        #     elif nums[i + 1] > prev:
+        #         length += 1
+        #         length = max_length
+        #     else:
+        #         length = 1
+        #     max_length = max(length, max_length)
+        #     print(1, ": ", max_length)
+        # return max_length
