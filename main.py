@@ -1,5 +1,5 @@
 import collections
-from typing import Optional
+from typing import Optional, List
 
 from solutions import Solutions
 
@@ -18,6 +18,7 @@ class TreeNode:
 
 
 def main():
+    # linked list
     def build_linked_list(values):
         if not values:
             return None
@@ -44,18 +45,38 @@ def main():
     # a = Solutions().pairSum(a)
     # print_linked_list(a)
 
-    def build_tree(arr: int[]) -> TreeNode():
-        root = TreeNode()
-        cur = root
-        for x in arr:
-            while cur:
-                if not cur.left:
-                    cur.left = TreeNode(x)
-                if not cur.right:
-                    cur.right = TreeNode(x)
+    # binary tree
+    # build a binary tree based on the list given
+    def build_tree(arr: List[int]) -> TreeNode():
+        if not arr:
+            return None
+        root = TreeNode(arr.pop(0))
+        q = [root]
+        while arr:
+            cur = q.pop(0)
+            if arr:
+                node = TreeNode(arr.pop(0))
+                cur.left = node
+                q.append(node)
+            if arr:
+                node = TreeNode(arr.pop(0))
+                cur.right = node
+                q.append(node)
+        return root
 
-    a = [3,9,20,None,None,15,7]
-    print(Solutions().maxDepth(a))
+    def dfs(root: TreeNode()):
+        if root:
+            print(root.val)
+            dfs(root.left)
+            dfs(root.right)
+
+    a = [3,5,1,6,2,0,8,None,None,7,4]
+    a = build_tree(a)
+    b = TreeNode(5)
+    c = TreeNode(1)
+    # dfs(a)
+    # Solutions().lowestCommonAncestor(a, b, c)
+    print(Solutions().lowestCommonAncestor(a, b, c))
 
 
 if __name__ == "__main__":

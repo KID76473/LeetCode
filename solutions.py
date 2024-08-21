@@ -1,7 +1,6 @@
 import collections
 import math
 from typing import List
-import queue
 from typing import Optional
 
 
@@ -615,7 +614,6 @@ class Solutions:
     def decodeString(self, s: str) -> str:
         return "NOT FINISHED"
 
-
     # 649. Dota2 Senate
     def predictPartyVictory(self, senate: str) -> str:
         # brute force
@@ -718,7 +716,6 @@ class Solutions:
         odd.next = even_head
         return head
 
-
     # 206. Reverse Linked List
     def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
         if not head:
@@ -738,7 +735,6 @@ class Solutions:
             cur = cur.next
         res = res.next
         return res
-
 
     # 2130. Maximum Twin Sum of a Linked List
     def pairSum(self, head: Optional[ListNode]) -> int:
@@ -780,7 +776,6 @@ class Solutions:
 
         return maxVal
 
-
     # 104. Maximum Depth of Binary Tree
     def maxDepth(self, root: Optional[TreeNode]) -> int:
         # # too slow and use too much space
@@ -803,7 +798,6 @@ class Solutions:
         right = self.maxDepth(root.right)
         return max(left, right) + 1
 
-
     # 872. Leaf-Similar Trees
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
         def helper(arr: List[int], root: Optional[TreeNode]):
@@ -824,7 +818,6 @@ class Solutions:
         helper(arr2, root2)
         return arr1 == arr2
 
-
     # 1448. Count Good Nodes in Binary Tree
     def goodNodes(self, root: TreeNode) -> int:
         def helper(max: int, root: TreeNode) -> int:
@@ -839,7 +832,6 @@ class Solutions:
         num = [0]
         helper(root.val, root)
         return num[0]
-
 
     # 1372. Longest ZigZag Path in a Binary Tree
     def longestZigZag(self, root: Optional[TreeNode]) -> int:
@@ -861,7 +853,6 @@ class Solutions:
         helper(root, False, 0)
         return longest[0]
 
-
     # 199. Binary Tree Right Side View
     def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
         result = []
@@ -874,3 +865,38 @@ class Solutions:
             helper(root.left, level + 1)
         helper(root, 0)
         return result
+
+    # 236. Lowest Common Ancestor of a Binary Tre
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if not root:
+            return None
+        if root == p or root == q:
+            return root
+        l = self.lowestCommonAncestor(root.left, p, q)
+        r = self.lowestCommonAncestor(root.right, p, q)
+        if l and r:
+            return root
+        return l if l else r
+
+
+    # 1161. Maximum Level Sum of a Binary Tree
+    def maxLevelSum(self, root: Optional[TreeNode]) -> int:
+        q = [root]
+        s = root.val
+        level, j = 1, 1
+        while len(q) > 0:
+            i, length = 0, len(q)
+            cur_val = 0
+            while i < length:
+                cur = q.pop(0)
+                cur_val += cur.val
+                i += 1
+                if cur.left:
+                    q.append(cur.left)
+                if cur.right:
+                    q.append(cur.right)
+            if cur_val > s:
+                s = cur_val
+                level = j
+            j += 1
+        return level
