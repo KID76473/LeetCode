@@ -1,6 +1,5 @@
 import collections
 from typing import Optional, List
-
 from solutions import Solutions
 
 
@@ -70,14 +69,11 @@ def main():
             dfs(root.left)
             dfs(root.right)
 
-    a = [3,5,1,6,2,0,8,None,None,7,4]
-    a = build_tree(a)
-    b = TreeNode(5)
-    c = TreeNode(1)
-    # dfs(a)
-    # Solutions().lowestCommonAncestor(a, b, c)
-    print(Solutions().lowestCommonAncestor(a, b, c))
-
+    a = [1,2,3,1]  # 4
+    # a = [2,7,9,3,1]  # 12
+    # a = [0,0,1,1]
+    # b = 9
+    print(Solutions().rob(a))
 
 if __name__ == "__main__":
     main()

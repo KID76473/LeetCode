@@ -1,5 +1,6 @@
 import collections
 import math
+import heapq
 from typing import List
 from typing import Optional
 
@@ -878,7 +879,6 @@ class Solutions:
             return root
         return l if l else r
 
-
     # 1161. Maximum Level Sum of a Binary Tree
     def maxLevelSum(self, root: Optional[TreeNode]) -> int:
         q = [root]
@@ -900,3 +900,487 @@ class Solutions:
                 level = j
             j += 1
         return level
+
+    # 700. Search in a Binary Search Tree
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        if not root:
+            return
+        elif val < root.val:
+            return self.searchBST(root.left, val)
+        elif val > root.val:
+            return self.searchBST(root.right, val)
+        return root
+
+    # 450. Delete Node in a BST
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if not root:
+            return None
+        if root.val > key:
+            root.left = self.deleteNode(root.left, key)
+        elif root.val < key:
+            root.right = self.deleteNode(root.right, key)
+        else:
+            if not root.left:
+                return root.right
+            if not root.right:
+                return root.left
+            if root.left and root.right:
+                temp = root.right
+                while temp.left:
+                    temp = temp.left
+                root.val = temp.val
+                root.right = self.deleteNode(root.right, root.val)
+        return root
+
+    # 841. Keys and Rooms
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        s = set()
+        s.add(0)
+        q = [0]
+        length = len(rooms)
+        while q:
+            index = q.pop()
+            for r in rooms[index]:
+                if r not in s:
+                    s.add(r)
+                    q.append(r)
+            if len(s) == length:
+                return True
+        return False
+
+    # 547. Number of Provinces
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        num = 0
+        visited = [False] * len(isConnected)
+        for i in range(len(isConnected)):  # loop thru every unvisited node
+            if not visited[i]:
+                visited[i] = True
+                s = set()
+                q = [i]
+                while q:  # dfs current node and its adjacent nodes
+                    cur = q.pop()
+                    if cur not in s:
+                        for j in range(len(isConnected[cur])):
+                            if isConnected[cur][j] and j not in s:
+                                q.append(j)
+                                visited[j] = True
+                        s.add(cur)
+                num += 1
+        return num
+
+    # week 2
+    # 1466. Reorder Routes to Make All Paths Lead to the City Zero
+    def minReorder(self, n: int, connections: List[List[int]]) -> int:
+        # # O(n^2) without using adj list
+        # count = 0
+        # s = [0]
+        # visited = []
+        # while s:
+        #     cur = s.pop()
+        #     visited.append(cur)
+        #     for e in connections:
+        #         if e[0] == cur and e[1] not in visited:
+        #             # print(e)
+        #             count += 1
+        #             s.append(e[1])
+        #             # visited.append(e[1])
+        #         elif e[1] == cur and e[0] not in visited:
+        #             s.append(e[0])
+        #             # visited.append(e[0])
+        # return count
+
+        # O(n) using adj list
+        changes = [0]
+        adjacent_list = [[] for _ in range(n)]
+        graph = [[] for _ in range(n)]
+        visited = {0}
+        for e in connections:
+            adjacent_list[e[0]].append(e[1])
+            graph[e[0]].append(e[1])
+            graph[e[1]].append(e[0])
+        def dfs(cur: int):
+            for neighbour in graph[cur]:
+                if neighbour not in visited:
+                    if cur not in adjacent_list[neighbour]:
+                        changes[0] += 1
+                    visited.add(neighbour)
+                    dfs(neighbour)
+        dfs(0)
+        return changes[0]
+
+    # # 399. Evaluate Division
+    # def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+    #     dictionary = set()
+    #     for e in equations:
+    #         if e[0] not in dictionary:
+    #             dictionary.add(e[0])
+    #         if e[1] not in dictionary:
+    #             dictionary.add(e[1])
+    #     for q in queries:
+    #         cur = 1
+    #         for char in q[0]:
+
+    # 1926. Nearest Exit from Entrance in Maze
+    def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
+        # def isInBound(index: int, bound: int):
+        #     return 0 <= index < bound
+        #
+        # def bfs(level: int):
+        #     while q:
+        #         cur = q.pop(0)
+        #         index = cur[0] * len(maze[0]) + cur[1]
+        #         for node in adj_list[index]:
+        #             if node not in visited:
+        #                 if (node[0] == 0 or node[0] == len(maze) - 1 or node[1] == 0 or node[1] == len(maze[0]) - 1) and node != entrance:
+        #                     return level
+        #                 q.append(node)
+        #                 visited.append(node)
+        #         bfs(level + 1)
+        #
+        # adj_list = []
+        # for i in range(len(maze)):
+        #     for j in range(len(maze[0])):
+        #         adj_list.append([])
+        #         index = i * len(maze[0]) + j
+        #         if isInBound(i + 1, len(maze)) and maze[i + 1][j] == '.':
+        #             adj_list[index].append([i + 1, j])
+        #         if isInBound(i - 1, len(maze)) and maze[i - 1][j] == '.':
+        #             adj_list[index].append([i - 1, j])
+        #         if isInBound(j + 1, len(maze[0])) and maze[i][j + 1] == '.':
+        #             adj_list[index].append([i, j + 1])
+        #         if isInBound(j - 1, len(maze[0])) and maze[i][j - 1] == '.':
+        #             adj_list[index].append([i, j - 1])
+        # q = [entrance]
+        # visited = []
+        # bfs(0)
+        # return -1
+
+        def isInBound(input: int, bound: int):
+            return 0 <= input < bound
+
+        adj_list = []
+        for i in range(len(maze)):
+            for j in range(len(maze[0])):
+                adj_list.append([])
+                if maze[i][j] == '.':
+                    index = i * len(maze[0]) + j
+                    if isInBound(i + 1, len(maze)) and maze[i + 1][j] == '.':
+                        adj_list[index].append([i + 1, j])
+                    if isInBound(i - 1, len(maze)) and maze[i - 1][j] == '.':
+                        adj_list[index].append([i - 1, j])
+                    if isInBound(j + 1, len(maze[0])) and maze[i][j + 1] == '.':
+                        adj_list[index].append([i, j + 1])
+                    if isInBound(j - 1, len(maze[0])) and maze[i][j - 1] == '.':
+                        adj_list[index].append([i, j - 1])
+
+        visited = {entrance[0] * len(maze[0]) + entrance[1]: 0}
+        q = [entrance]
+        while q:
+            cur = q.pop(0)
+            # print(f"current: {cur}")
+            # print(f"adjacents: {adj_list[cur[0] * len(maze[0]) + cur[1]]}")
+            cur_index = cur[0] * len(maze[0]) + cur[1]
+            for node in adj_list[cur_index]:
+                node_index = node[0] * len(maze[0]) + node[1]
+                if node_index not in visited.keys():
+                    # print(f"node: {node}")
+                    if node != entrance and (node[0] == 0 or node[0] == len(maze) - 1 or node[1] == 0 or node[1] == len(maze[0]) - 1):
+                        return visited[cur_index] + 1
+                    q.append(node)
+                    visited[node_index] = visited[cur_index] + 1
+            # print("------------------")
+        return -1
+
+    # 994. Rotting Oranges
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        def isInBound(input: int, bound: int):
+            return 0 <= input < bound
+
+        # print(grid, len(grid))
+        q = []
+        visited = {}
+        rotten_ct, fresh_ct = 0, 0
+        for i in range(len(grid)):
+            for j in range(len(grid[i])):
+                # print(grid[i][j])
+                if grid[i][j] == 1:
+                    fresh_ct += 1
+                elif grid[i][j] == 2:
+                    q.append([i, j])
+                    visited[i * len(grid[0]) + j] = 0
+                    rotten_ct += 1
+        if rotten_ct == 0:
+            if fresh_ct == 0:
+                return 0
+            else:
+                return -1
+        # print(f"number of rotten: {rotten_ct}")
+        # print(f"number of fresh: {fresh_ct}")
+
+        dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+        level = 0
+        covered = 0
+        while q:
+            # print(f"grid: {grid}")
+            cur = q.pop(0)
+            cur_index = cur[0] * len(grid[0]) + cur[1]
+            # print(f"cur_index: {cur_index}")
+
+            for d in dirs:
+                indices = [cur[0] + d[0], cur[1] + d[1]]
+                index = indices[0] * len(grid[0]) + indices[1]
+                if (isInBound(indices[0], len(grid)) and
+                    isInBound(indices[1], len(grid[0])) and
+                    grid[indices[0]][indices[1]] == 1 and
+                    index not in visited):
+
+                    # print(f"neighbour_index: {index, indices}")
+                    grid[indices[0]][indices[1]] = 2
+                    q.append(indices)
+                    level = visited[cur_index] + 1
+                    visited[index]= level
+                    covered += 1
+        #     print(f"level: {level}")
+        #     print("---------------------------------------------------")
+        # print(f"fresh: {fresh_ct}, covered: {covered}")
+        return level if covered == fresh_ct else -1
+
+    # 215. Kth Largest Element in an Array
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        heap = nums[: k]
+        heapq.heapify(heap)
+        for num in nums[k: ]:
+            if num > heap[0]:
+                heapq.heappop(heap)
+                heapq.heappush(heap, num)
+        return heap[0]
+
+    # 2542. Maximum Subsequence Score
+    def maxScore(self, nums1: List[int], nums2: List[int], k: int) -> int:
+        pairs = [[n1, n2] for n1, n2 in zip(nums1, nums2)]
+        pairs = sorted(pairs, key=lambda p: p[1], reverse=True)
+        res = 0
+        n1Sum = 0
+        minHeap = []
+        for n1, n2 in pairs:
+            n1Sum += n1
+            heapq.heappush(minHeap, n1)
+            if len(minHeap) > k:
+                n1Pop = heapq.heappop(minHeap)
+                n1Sum -= n1Pop
+            if len(minHeap) == k:
+                res = max(n1Sum * n2, res)
+        return res
+
+    # 2462. Total Cost to Hire K Workers
+    def totalCost(self, costs: List[int], k: int, candidates: int) -> int:
+        priority_queue = []
+        n = len(costs)
+        left_candidate_bound = candidates - 1
+        right_candidate_bound = n - candidates
+        for index in range(candidates):
+            priority_queue.append((costs[index], index))
+        for index in range(n - candidates, n):
+            if index > left_candidate_bound:
+                priority_queue.append((costs[index], index))
+        heapq.heapify(priority_queue)
+        total_cost = 0
+        for _ in range(k):
+            cost, index = heapq.heappop(priority_queue)
+            total_cost += cost
+            if index <= left_candidate_bound:
+                left_candidate_bound += 1
+                if left_candidate_bound < right_candidate_bound:
+                    heapq.heappush(priority_queue, (costs[left_candidate_bound], left_candidate_bound))
+            if index >= right_candidate_bound:
+                right_candidate_bound -= 1
+                if left_candidate_bound < right_candidate_bound:
+                    heapq.heappush(priority_queue, (costs[right_candidate_bound], right_candidate_bound))
+        return total_cost
+
+    # 2300. Successful Pairs of Spells and Potions
+    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:
+        potions.sort()
+        pairs = []
+        for s in spells:
+            l, h = 0, len(potions) - 1
+            while l <= h:
+                m = l + int((h - l) / 2)
+                if s * potions[m] >= success:
+                    h = m - 1
+                else:
+                    l = m + 1
+            pairs.append(len(potions) - l)
+        return pairs
+
+    # 162. Find Peak Element
+    def findPeakElement(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        while l < r:
+            m = (l + r) // 2
+            if nums[m] > nums[m + 1]:
+                r = m
+            else:
+                l = m + 1
+        return l
+        # if len(nums) == 2:
+        #     return 0 if nums[0] > nums[1] else 1
+        # for i in range(1, len(nums) - 1):
+        #     if nums[i] > nums[i - 1] and  nums[i] > nums[i + 1]:
+        #         return i
+        # if len(nums) >= 2 and nums[-1] > nums[-2]:
+        #     return len(nums) - 1
+        # return 0
+
+    # 875. Koko Eating Bananas
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        l, r = 1, max(piles)
+        if len(piles) == 1:
+            return math.ceil(piles[0] / h)
+        while l < r:
+            bananas = piles.copy()
+            m = (l + r) // 2
+            ct = 0
+            print(f"l, m, h: {l, m, r}")
+            while bananas:
+                print(bananas)
+                if bananas[0] > m:
+                    ct += math.ceil(bananas[0] / m)
+                else:
+                    ct += 1
+                bananas.pop(0)
+            print(f"ct: {ct}")
+            if ct > h:
+                l = m + 1
+            else:
+                r = m
+        return l
+
+    # 17. Letter Combinations of a Phone Number
+    def letterCombinations(self, digits: str) -> List[str]:
+        keyboard = {
+            "2": "abc",
+            "3": "def",
+            "4": "ghi",
+            "5": "jkl",
+            "6": "mno",
+            "7": "pqrs",
+            "8": "tuv",
+            "9": "wxyz"
+        }
+        if len(digits) == 0:
+            return []
+        res = []
+        first = digits[0]
+        digits = digits[1:]
+        for l in keyboard[first]:
+            res.append(l)
+        for d in digits:
+            length = len(res)
+            for i in range(length):
+                for l in keyboard[d]:
+                    res.append(res[i] + l)
+                    print(res[i] + l)
+            res = res[length:]
+        return res
+
+    # 216. Combination Sum III
+    def combinationSum3(self, k: int, n: int) -> List[List[int]]:
+        def helper(num, cur, cur_sum):
+            # print(round_left)
+            if len(cur) == k:
+                if cur_sum == n:
+                    res.append(cur)
+            for c in range(num, max_num + 1):
+                subtotal = cur_sum + c
+                if subtotal <= n:
+                    helper(c + 1, cur + [c], subtotal)
+                # else:
+                #     return
+        if k > n:
+            return []
+        max_num = 0
+        for i in range(1, k):
+            max_num += i
+        max_num = n - max_num
+        # res = [[i] for i in range(1, max_num + 1)]
+        res = []
+        helper(1, [], 0)
+        return res
+
+    # 1137. N-th Tribonacci Number
+    def tribonacci(self, n: int) -> int:
+        if n == 0:
+            return 0
+        elif n < 3:
+            return 1
+        fib = [0] * (n + 1)
+        fib[1], fib[2] = 1, 1
+        print(fib)
+        for i in range(3, n + 1):
+            fib[i] = fib[i - 1] + fib[i - 2] + fib[i - 3]
+        return fib[-1]
+
+    # 746. Min Cost Climbing Stairs
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        length = len(cost)
+        dp = [0] * length
+        dp[0] = cost[0]
+        dp[1] = cost[1]
+        for i in range(2, length):
+            # print(dp)
+            # if dp[i - 2] < dp[i - 1]:
+            #     print(f"at {i}th step, choose {i - 2}, cost {cost[i - 2]}")
+            #     dp[i] = dp[i - 2] + cost[i]
+            # else:
+            #     print(f"at {i}th step, choose {i - 1}, cost {cost[i - 1]}")
+            #     dp[i] = dp[i - 1] + cost[i]
+            dp[i] = min(dp[i - 2], dp[i - 1]) + cost[i]
+        return min(dp[-1], dp[-2])
+
+    # 198. House Robber
+    def rob(self, nums: List[int]) -> int:
+        length = len(nums)
+        if length < 2:
+            return nums[0]
+        dp = [0] * length
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+        for i in range(2, length):
+            dp[i] = max(dp[i - 2] + nums[i], dp[i - 1])
+        return dp[-1]
+
+    # 62. Unique Paths
+    def uniquePaths(self, m: int, n: int) -> int:
+        dp = [[1] * n] * m
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[-1][-1]
+
+    # 1143. Longest Common Subsequence
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        l1, l2 = len(text1) + 1, len(text2) + 1
+        # dp = [[0] * l2] * l1  # all lines have the same address
+        dp = [[0] * l2 for _ in range(l1)]
+        for i in range(1, l1):
+            for j in range(1, l2):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = max(dp[i - 1][j - 1] + 1, dp[i - 1][j], dp[i][j - 1])
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[-1][-1]
+
+    # 121. Best Time to Buy and Sell Stock
+    def maxProfit(self, prices: List[int]) -> int:
+        length = len(prices)
+        dp = [0] * length
+        cur_min = 1e4
+        for i in range(length):
+            if prices[i] < cur_min:
+                cur_min = prices[i]
+            else:
+                dp[i] = prices[i] - cur_min
+        return max(dp)
+
+    # 714. Best Time to Buy and Sell Stock with Transaction Fee
