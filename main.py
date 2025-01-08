@@ -1,6 +1,7 @@
 import collections
 from typing import Optional, List
-from solutions import Solutions
+from solutions import Solutions_LeetCode
+from oneline_assessment import Solution_oneline_assessment
 
 
 class ListNode:
@@ -69,11 +70,17 @@ def main():
             dfs(root.left)
             dfs(root.right)
 
-    a = [1,2,3,1]  # 4
-    # a = [2,7,9,3,1]  # 12
-    # a = [0,0,1,1]
-    # b = 9
-    print(Solutions().rob(a))
+    a = "***|**|*****|**||**|*"
+    m = 3
+    b = [2,5,6]
+    n = 3
+    b = [[1,17],[4,5],[14,17],[5,11],[15,16]]
+    print(Solutions_LeetCode().platesBetweenCandles(a, b))
+
+    # # OA
+    # # a = [1, 10, 4, 5, 3]
+    # a = [0, 7, 8, 9, 10, 1, 2, 3, 4, 1, 2, 3]
+    # print(Solution_oneline_assessment().interesting_watch_sequence(a))
 
 if __name__ == "__main__":
     main()

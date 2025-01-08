@@ -1,3 +1,4 @@
+import bisect
 import collections
 import math
 import heapq
@@ -18,7 +19,7 @@ class TreeNode:
         self.right = right
 
 
-class Solutions:
+class Solutions_LeetCode:
     # 121
     def maxProfit(self, prices: List[int]) -> int:
         min_price = 10000
@@ -1383,4 +1384,193 @@ class Solutions:
                 dp[i] = prices[i] - cur_min
         return max(dp)
 
-    # 714. Best Time to Buy and Sell Stock with Transaction Fee
+    # 714. Best Time to Buy and Sell Stock with Transaction Fee NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    # 435. Non-overlapping Intervals NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        f = lambda x: x[1] - x[0]
+        # for i in intervals:
+        #     print(f(i))
+        arr = sorted(intervals, reverse=True, key=f)
+        # print(arr)
+
+        # def check_overlapping(arr):
+        #     for a in arr:
+        #
+        #     return True
+        return 0
+    #
+    # # 88. Merge Sorted Array
+    # def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+    #     """
+    #     Do not return anything, modify nums1 in-place instead.
+    #     """
+    #     last = 0
+    #     for n2 in nums2:
+    #         ended = True
+    #         for i in nums1[last: m + 1]:
+    #             if n2 <= nums1[i]:
+    #                 nums1.insert(i, n2)
+    #                 last = i
+    #                 ended = False
+    #                 break
+    #         if ended:
+    #             nums1.insert(m + 1, n2)
+    #     nums1 = nums1[0: m + n + 1]
+    #     res = nums1[0: m + n]
+    #     return res
+
+    # 15. 3Sum NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        table = {}
+        length = len(nums)
+        res = []
+        for i in range(length):
+            for j in range(i + 1, length):
+                cur_sum = nums[i] + nums[j]
+                if cur_sum != table.keys():
+                    table[cur_sum] = [i, j]
+                # else:
+                #     table[cur_sum].append([i, j])
+        for i in range(length):
+            if -nums[i] in table.keys() and i not in table[-nums[i]]:
+                print(f"cur: {i, nums[i]}")
+                print(f"in table: {table[-nums[i]]}")
+                res.append([nums[i], nums[table[-nums[i]][0]], nums[table[-nums[i]][1]]])
+        removed = []
+        for i in range(len(res)):
+            for j in range(i + 1, len(res)):
+                if set(res[i]) == set(res[j]):
+                    removed.append([j, nums[j]])
+        # for r in removed
+        return res
+
+    # 300. Longest Increasing Subsequence
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        # # O(n^2)
+        # length = len(nums)
+        # dp = [1] * length
+        # for i in range(length - 1, -1, -1):
+        #     for j in range(i + 1, length):
+        #         if nums[i] < nums[j]:
+        #             dp[i] = max(dp[i], dp[j] + 1)
+        # return max(dp)
+
+        # O(nlogn)
+        def binary_search(array, target):
+            l, r = 0, len(array) - 1
+            while l <= r:
+                m = (l + r) // 2
+                if array[m] == target:
+                    return m
+                elif array[m] < target:
+                    l = m + 1
+                else:
+                    r = m - 1
+            return l
+        res = []
+        for n in nums:
+            if len(res) == 0 or n > res[-1]:
+                res.append(n)
+            else:
+                index = binary_search(res, n)
+                res[index] = n
+        return len(res)
+
+    # 2055. Plates Between Candles
+    def platesBetweenCandles(self, s: str, queries: List[List[int]]) -> List[int]:
+        # O(q * logn)
+        candles_index = [i for i, c in enumerate(s) if c == '|']
+        res = []
+        for q in queries:
+            i = bisect.bisect_left(candles_index, q[0])
+            j = bisect.bisect(candles_index, q[1]) - 1
+            res.append(candles_index[j] - candles_index[i] - (j - i) if j > i else 0)
+        return res
+
+        # # O(nq) too slow
+        # res = []
+        # for q in queries:
+        #     cur_res, cur = 0, 0
+        #     candle = False
+        #     for c in s[q[0]: q[1] + 1]:
+        #         if not candle and c == '|':
+        #             candle = True
+        #             continue
+        #         if candle:
+        #             if c == '*':
+        #                 cur += 1
+        #             else:
+        #                 cur_res += cur
+        #                 cur = 0
+        #     res.append(cur_res)
+        # return res
+
+    # 53. Maximum Subarray
+    def maxSubArray(self, nums: List[int]) -> int:
+        res = nums[0]
+        last_sum = 0
+        for n in nums:
+            last_sum = max(0, last_sum)
+            last_sum += n
+            res = max(last_sum, res)
+        return res
+
+    # 189. Rotate Array
+    def rotate(self, nums: List[int], k: int) -> None:
+        n = len(nums)
+        k %= n
+        if k != 0:
+            nums[:] = nums[-k:] + nums[: n - k]
+
+        # n = len(nums)
+        # k %= n
+        # for i in range(n):
+        #     nums.append(nums[i])
+        # for _ in range(n - k):
+        #     nums.pop(0)
+        # for _ in range(k):
+        #     nums.pop(-1)
+
+    # 55. Jump Game
+    def canJump(self, nums: List[int]) -> bool:
+        dp = [True]
+        for i in range(1, len(nums)):
+            temp = False
+            for j in range(i):
+                if dp[-(j + 1)] and nums[i - (j + 1)] >= j + 1:
+                    dp.append(True)
+                    temp = True
+                    break
+            if not temp:
+                return False
+        return True
+
+    # 45. Jump Game II
+    def jump(self, nums: List[int]) -> int:
+        n = len(nums)
+        dp = [n] * n
+        dp[0] = 0
+        for i in range(n):
+            for j in range(1, nums[i] + 1):
+                index = i + j
+                if index < n:
+                    dp[i + j] = min(dp[i + j], dp[i] + 1)
+        return dp[-1]
+
+    # 274. H-Index
+    def hIndex(self, citations: List[int]) -> int:
+        def count(x):
+            res = 0
+            for c in citations:
+                if c >= x:
+                    res += 1
+            return res
+
+        n = len(citations)
+        last = 0
+        for i in range(n + 1):
+            if count(i + 1) < i + 1:
+                return last
+            last = i + 1
+        return last
