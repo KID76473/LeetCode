@@ -1009,17 +1009,36 @@ class Solutions_LeetCode:
         dfs(0)
         return changes[0]
 
-    # # 399. Evaluate Division
-    # def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
-    #     dictionary = set()
-    #     for e in equations:
-    #         if e[0] not in dictionary:
-    #             dictionary.add(e[0])
-    #         if e[1] not in dictionary:
-    #             dictionary.add(e[1])
-    #     for q in queries:
-    #         cur = 1
-    #         for char in q[0]:
+    # 399. Evaluate Division
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        d = {}
+        for (x, y), v in zip(equations, values):
+            if x not in d.keys():
+                d[x] = {y: v}
+            else:
+                d[x][y] = v
+            if y not in d.keys():
+                d[y] = {x: 1 / v}
+            else:
+                d[y][x] = 1 / v
+        def bfs(s, t):
+            q = [[s, 1]]
+            visited = {s}
+            while q:
+                cur_node, cur_val = q.pop(0)
+                if cur_node not in d.keys():
+                    return -1
+                if cur_node == t:
+                    return cur_val
+                for neighbour in d[cur_node].keys():
+                    if neighbour not in visited:
+                        visited.add(neighbour)
+                        q.append([neighbour, cur_val * d[cur_node][neighbour]])
+            return -1
+        res = []
+        for (q1, q2) in queries:
+            res.append(bfs(q1, q2))
+        return res
 
     # 1926. Nearest Exit from Entrance in Maze
     def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
@@ -1281,7 +1300,6 @@ class Solutions_LeetCode:
             for i in range(length):
                 for l in keyboard[d]:
                     res.append(res[i] + l)
-                    print(res[i] + l)
             res = res[length:]
         return res
 
@@ -1420,31 +1438,6 @@ class Solutions_LeetCode:
     #     res = nums1[0: m + n]
     #     return res
 
-    # 15. 3Sum NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    def threeSum(self, nums: List[int]) -> List[List[int]]:
-        table = {}
-        length = len(nums)
-        res = []
-        for i in range(length):
-            for j in range(i + 1, length):
-                cur_sum = nums[i] + nums[j]
-                if cur_sum != table.keys():
-                    table[cur_sum] = [i, j]
-                # else:
-                #     table[cur_sum].append([i, j])
-        for i in range(length):
-            if -nums[i] in table.keys() and i not in table[-nums[i]]:
-                print(f"cur: {i, nums[i]}")
-                print(f"in table: {table[-nums[i]]}")
-                res.append([nums[i], nums[table[-nums[i]][0]], nums[table[-nums[i]][1]]])
-        removed = []
-        for i in range(len(res)):
-            for j in range(i + 1, len(res)):
-                if set(res[i]) == set(res[j]):
-                    removed.append([j, nums[j]])
-        # for r in removed
-        return res
-
     # 300. Longest Increasing Subsequence
     def lengthOfLIS(self, nums: List[int]) -> int:
         # # O(n^2)
@@ -1534,17 +1527,23 @@ class Solutions_LeetCode:
 
     # 55. Jump Game
     def canJump(self, nums: List[int]) -> bool:
-        dp = [True]
-        for i in range(1, len(nums)):
-            temp = False
-            for j in range(i):
-                if dp[-(j + 1)] and nums[i - (j + 1)] >= j + 1:
-                    dp.append(True)
-                    temp = True
-                    break
-            if not temp:
-                return False
-        return True
+        goal = len(nums) - 1
+        for i in range(goal - 1, -1, -1):
+            if i + nums[i] >= goal:
+                goal = i
+        return True if goal == 0 else False
+
+        # dp = [True]
+        # for i in range(1, len(nums)):
+        #     temp = False
+        #     for j in range(i):
+        #         if dp[-(j + 1)] and nums[i - (j + 1)] >= j + 1:
+        #             dp.append(True)
+        #             temp = True
+        #             break
+        #     if not temp:
+        #         return False
+        # return True
 
     # 45. Jump Game II
     def jump(self, nums: List[int]) -> int:
@@ -1560,17 +1559,339 @@ class Solutions_LeetCode:
 
     # 274. H-Index
     def hIndex(self, citations: List[int]) -> int:
-        def count(x):
-            res = 0
-            for c in citations:
-                if c >= x:
-                    res += 1
-            return res
+        # # too slow
+        # def count(x):
+        #     return bisect.bisect(citations, x)
+        # n = len(citations)
+        # citations.sort()
+        # last = 0
+        # for i in range(n + 1):
+        #     if count(i + 1) < i + 1:
+        #         return last
+        #     last = i + 1
+        # return last
 
+        # combine the method above
+        # beats 100% of users
+        # inspired by myself completely
+        def count(x):
+            return n - bisect.bisect_left(citations, x)
         n = len(citations)
+        if n == 1:
+            return 0 if citations[0] == 0 else 1
+        citations.sort()
+        l, r = 0, n
+        while l + 1 < r:
+            m = (l + r) // 2
+            if count(m) == m:
+                return m
+            elif count(m) < m:
+                r = m
+            else:
+                l = m
         last = 0
         for i in range(n + 1):
             if count(i + 1) < i + 1:
                 return last
             last = i + 1
-        return last
+        return max(l, last)
+
+    # 134. Gas Station
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        if sum(gas) < sum(cost):
+            return -1
+        n = len(gas)
+        dif = [gas[i] - cost[i] for i in range(n)]
+        start = 0
+        cur = 0
+        for i in range(n):
+            cur += dif[i]
+            if cur < 0:
+                cur = 0
+                start = i + 1
+        return start
+
+    # 75. Sort Colors
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        n = len(nums)
+        i, j = 0, n - 1
+        cur = 0
+        while i < n:
+            if nums[i] != cur:
+                while j > i:
+                    if nums[j] == cur:
+                        temp = nums[i]
+                        nums[i] = nums[j]
+                        nums[j] = temp
+                        break
+                    else:
+                        j -= 1
+                if i == j:
+                    cur += 1
+                    i -= 1
+                    j = n - 1
+            i += 1
+
+    # 13. Roman to Integer
+    def romanToInt(self, s: str) -> int:
+        romans = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+        res = 0
+        s = s.replace("IV", 'IIII')
+        s = s.replace("IX", 'VIIII')
+        s = s.replace("XL", 'XXXX')
+        s = s.replace("XC", 'LXXXX')
+        s = s.replace("CD", 'CCCC')
+        s = s.replace("CM", 'DCCCC')
+        for c in s:
+            res += romans[c]
+        return res
+
+        # romans = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+        # res = 0
+        # for i in range(len(s) - 1):
+        #     if romans[s[i]] < romans[s[i + 1]]:
+        #         res -= romans[s[i]]
+        #     else:
+        #         res += romans[s[i]]
+        # return res + romans[s[-1]]
+
+    # 12. Integer to Roman
+    def intToRoman(self, num: int) -> str:
+        romans = {1000: 'M', 900: 'CM', 500: 'D', 400: 'CD', 100: 'C', 90: 'XC', 50: 'L', 40: 'XL', 10: 'X', 9: 'IX',
+                  5: 'V', 4: 'IV', 1: 'I'}
+        res = ''
+        for k in romans.keys():
+            cur = num // k
+            print(cur, num, k)
+            if cur >= 1:
+                for _ in range(cur):
+                    res += romans[k]
+            num %= k
+        return res
+
+        # romans = {1000: 'M', 500: 'D', 100: 'C', 50: 'L', 10: 'X', 5: 'V', 1: 'I'}
+        # numbers = [1000, 500, 100, 50, 10, 5, 1]
+        # letters = 'MDCLXVI'
+        # res = ''
+        # for i in range(len(romans.keys())):
+        #     k = numbers[i]
+        #     cur = int(num / k)
+        #     print(cur, k)
+        #     if cur >= 1:
+        #         for _ in range(cur):
+        #             res += romans[k]
+        #     num %= k
+        # res = res.replace('VIIII', "IX")
+        # res = res.replace('IIII', "IV")
+        # res = res.replace('LXXXX', "XC")
+        # res = res.replace('XXXX', "XL")
+        # res = res.replace('DCCCC', "CM")
+        # res = res.replace('CCCC', "CD")
+        # return res
+
+    # 6. Zigzag Conversion
+    def convert(self, s: str, numRows: int) -> str:
+        if numRows == 1:
+            return s
+        num = 2 * numRows - 2
+        n = len(s)
+        res = ''
+        i = 0
+        while i < n:
+            res += s[i]
+            i += num
+        i = 0
+        for j in range(1, num // 2 + 1):
+            while i < n:
+                if i + j < n:
+                    res += s[i + j]
+                if i + num - j < n and j != num - j:
+                    res += s[i + num - j]
+                i += num
+            i = 0
+        return res
+
+    # 167. Two Sum II - Input Array Is Sorted
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # O(n)
+        l, r = 0, len(numbers) - 1
+        while l < r:
+            cur_sum = numbers[l] + numbers[r]
+            if cur_sum == target:
+                return [l + 1, r + 1]
+            elif cur_sum < target:
+                l += 1
+            else:
+                r -= 1
+
+        # # O(nlogn)
+        # n = len(numbers)
+        # i = 0
+        # while i < n:
+        #     temp = bisect.bisect(numbers, target - numbers[i]) - 1
+        #     print(i, temp)
+        #     if temp != n and numbers[i] + numbers[temp] == target and i != temp:
+        #         return [i + 1, temp + 1]
+        #     i += 1
+
+    # 42. Trapping Rain Water
+    def trap(self, height: List[int]) -> int:
+        l, r = 0, len(height) - 1
+        lm, rm = height[0], height[-1]
+        res = 0
+        while l < r:
+            if height[l] <= height[r]:
+                if height[l] > lm:
+                    lm = height[l]
+                else:
+                    res += lm - height[l]
+                l += 1
+            else:
+                if height[r] > rm:
+                    rm = height[r]
+                else:
+                    res += rm - height[r]
+                r -= 1
+        return res
+
+        # res = 0
+        # n = len(height)
+        # l, r = 0, 0
+        # lm = [0] * n
+        # rm = [0] * n
+        # for i in range(n):
+        #     j = -i - 1
+        #     lm[i] = l
+        #     rm[j] = r
+        #     l = max(height[i], l)
+        #     r = max(height[j], r)
+        # for i in range(n):
+        #     temp =  min(lm[i], rm[i])
+        #     res += max(0, temp - height[i])
+        # return res
+
+    # 15. 3Sum
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        res = []
+        nums.sort()
+        n = len(nums)
+        for i in range(n):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            j = i + 1
+            k = n - 1
+            while j < k:
+                total = nums[i] + nums[j] + nums[k]
+                if total == 0:
+                    res.append([nums[i], nums[j], nums[k]])
+                    j += 1
+                    while nums[j] == nums[j - 1] and j < k:
+                        j += 1
+                elif total < 0:
+                    j += 1
+                else:
+                    k -= 1
+        return res
+
+    # 125. Valid Palindrome
+    def isPalindrome(self, s: str) -> bool:
+        # s = ''.join(c.lower() for c in s if c.isalnum())
+        # return s == s[::-1]
+
+        l, r = 0, len(s) - 1
+        while l < r:
+            while not s[l].isalpha() and not s[l].isnumeric() and l < r:
+                l += 1
+            while not s[r].isalpha() and not s[r].isnumeric() and l < r:
+                r -= 1
+            ll = s[l].lower()
+            rr = s[r].lower()
+            if ll != rr:
+                return False
+            l += 1
+            r -= 1
+        return True
+
+    # 1109. Corporate Flight Bookings
+    def corpFlightBookings(self, bookings: List[List[int]], n: int) -> List[int]:
+        res = [0] * n
+        for b in bookings:
+            res[b[0] - 1] += b[2]
+            if b[1] != n:
+                res[b[1]] -= b[2]
+        for i in range(n - 1):
+            res[i + 1] += res[i]
+        return res
+
+    # similar to 325. maximum size subarray sum equals k
+    # maximum size subarray sum equals 0
+    def max_zero_sum_subarray_length(self, arr):
+        prefix_sum_map = {0: -1}  # dict to store the first occurrence of a prefix sum
+        prefix_sum = 0
+        max_len = 0
+        for i, num in enumerate(arr):
+            prefix_sum += num
+            if prefix_sum == 0:
+                max_len = i + 1
+            if prefix_sum in prefix_sum_map:
+                subarray_length = i - prefix_sum_map[prefix_sum]
+                max_len = max(max_len, subarray_length)
+            else:
+                prefix_sum_map[prefix_sum] = i
+        return max_len
+
+    # 209. Minimum Size Subarray Sum
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        length = len(nums)
+        if sum(nums) < target:
+            return 0
+        l, r = 0, 0
+        min_len = length
+        cur = nums[0]
+        while r < length:
+            if cur >= target:
+                min_len = min(min_len, r - l + 1)
+                cur -= nums[l]
+                l += 1
+            else:
+                r += 1
+                if r != length:
+                    cur += nums[r]
+        return min_len
+
+    # 516. Longest Palindromic Subsequence
+    def longestPalindromeSubseq(self, s: str) -> int:
+        length = len(s)
+        if length == 1:
+            return 1
+        dp = [[0] * length for _ in range(length)]
+        for i in range(length):
+            dp[i][i] = 1
+        for i in range(length - 1, -1, -1):
+            for j in range(i + 1, length):
+                if s[i] == s[j]:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1], dp[i + 1][j - 1] + 2)
+                else:
+                    dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])
+        return dp[0][-1]
+
+    # 437. Path Sum III
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        if not root:
+            return 0
+        res = 0
+        cur_sum = 0
+        q = [[root, [0]]]
+        while q:
+            cur_node, sum_list = q.pop(0)
+            cur_sum = sum_list[-1] + cur_node.val
+            res += sum_list.count(cur_sum - targetSum)
+            new_list = sum_list + [cur_sum]
+            if cur_node.left:
+                q.append([cur_node.left, new_list])
+            if cur_node.right:
+                q.append([cur_node.right, new_list])
+        return res

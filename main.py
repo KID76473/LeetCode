@@ -70,17 +70,13 @@ def main():
             dfs(root.left)
             dfs(root.right)
 
-    a = "***|**|*****|**||**|*"
+    a = [1, 0, -1, 2]
     m = 3
     b = [2,5,6]
     n = 3
     b = [[1,17],[4,5],[14,17],[5,11],[15,16]]
-    print(Solutions_LeetCode().platesBetweenCandles(a, b))
+    print(Solutions_LeetCode().max_zero_sum_subarray_length(a))
 
-    # # OA
-    # # a = [1, 10, 4, 5, 3]
-    # a = [0, 7, 8, 9, 10, 1, 2, 3, 4, 1, 2, 3]
-    # print(Solution_oneline_assessment().interesting_watch_sequence(a))
 
 if __name__ == "__main__":
     main()
