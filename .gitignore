@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Testing output
+*.log
+
+# Virtual environment folders
+venv/
+.env/
+
+# IDE-specific files
+.idea/
+*.iml
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+
+# VSCode-specific files/folders
+.vscode/
+
+# PyCharm-specific files
+*.idea/
+
+# Ignore any other temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Ignore custom solution files
+*.solution
+huawei_solution.py
+oneline_assessment.py
+
+# Dependency file
+pipfile.lock
+poetry.lock

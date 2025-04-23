@@ -2,6 +2,7 @@ import collections
 from typing import Optional, List
 from solutions import Solutions_LeetCode
 from oneline_assessment import Solution_oneline_assessment
+from huawei import huawei_solution
 
 
 class ListNode:
@@ -70,12 +71,11 @@ def main():
             dfs(root.left)
             dfs(root.right)
 
-    a = [1, 0, -1, 2]
-    m = 3
-    b = [2,5,6]
-    n = 3
-    b = [[1,17],[4,5],[14,17],[5,11],[15,16]]
-    print(Solutions_LeetCode().max_zero_sum_subarray_length(a))
+    nums = [1,1,1,1,1]
+    nums = [0]
+    target = 5
+    target = 0
+    print(Solutions_LeetCode().findTargetSumWays(nums, target))
 
 
 if __name__ == "__main__":

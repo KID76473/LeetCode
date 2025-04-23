@@ -1,4 +1,5 @@
 # This file is to practice classical algorithm
+import heapq
 
 
 # tree
@@ -95,16 +96,158 @@ def lowest_common_ancestor(root, t1, t2):
 # # print(lowest_common_ancestor(root, 3, 4))
 
 # graph
-def dijk(g, s, t):  # g is a dict {node: [adjacent node]}
-    res = {}
-    visited = {s}
+
+# def dijk(g, s, t):  # g is a dict {node: [adjacent node]}
+#     res = {}
+#     visited = {s}
+#     for k in g.keys():
+#         res[k] = 'inf'
+#     res[s] = 0
+#     length = len(g)
+#     while len(visited) != length:
+#         cur = min(res, key = lambda x: g[x])
+#         for node in g[cur]:
+#             res[node] = min(res[node], res[cur] + g[cur][node])
+#             visited.add(node)
+#     return res[t]
+
+def dijkstra(edges, start):
+    def find_min(graph):
+        res = -1
+        val = 100000000
+        for k in graph.keys():
+            if k not in visited and val > graph[k]:
+                val = graph[k]
+                res = k
+        return res
+
+    visited = set()
+    g = {}
+    for e in edges:
+        if e[1] not in g:
+            g[e[1]] = []
+        if e[0] in g:
+            g[e[0]].append([e[1], e[2]])
+        else:
+            g[e[0]] = [[e[1], e[2]]]
+    print(f'g: {g}')
+    num_nodes = len(g)
+    min_dist = {i + 1: 10000000 for i in range(num_nodes)}
+    min_dist[start] = 0
+    print(f'min_dist: {min_dist}')
+    for _ in range(num_nodes):
+        cur = find_min(min_dist)
+        print(f'cur: {cur}')
+        for neighbour in g[cur]:
+            node, value = neighbour[0], neighbour[1]
+            if node not in visited and min_dist[cur] + value < min_dist[node]:
+                min_dist[node] = min_dist[cur] + value
+        visited.add(cur)
+    return min_dist
+
+
+def dijkstra_min_heap(edges, start):
+    g = {}
+    for u, v, w in edges:
+        if u not in g:
+            g[u] = []
+        if v not in g:
+            g[v] = []
+        g[u].append([v, w])
+    length = len(g.keys())
+    min_dist = {i + 1: float('inf') for i in range(length)}
+    heap = []
+    heapq.heappush(heap, (0, start))
+    while heap:
+        cur_dist, node = heapq.heappop(heap)
+        if cur_dist > min_dist[node]:
+            continue
+        for u, v in g[node]:
+            if cur_dist + v < min_dist[u]:
+                min_dist[u] = cur_dist + v
+                heapq.heappush(heap, (cur_dist + v, u))
+    return min_dist
+
+
+# def dijkstra_min_heap(graph, start):
+#     g = {}
+#     for u, v, w in graph:
+#         if u not in g:
+#             g[u] = []
+#         if v not in g:
+#             g[v] = []
+#         g[u].append(v, w)
+#     min_dist = {i + 1: float('inf') for i in range(len(g.keys()))}
+#     visited = [[0, start]]
+#     heapq.heapify(visited)
+#     while visited:
+#         cur_val, cur_node = heapq.heappop(visited)
+#         if cur_val > min_dist[cur_node]:
+#             continue
+#         for neighbour in g[cur_node]:
+#             if cur_val + neighbour[1] < min_dist[neighbour[0]]:
+#                 min_dist[neighbour[0]] = cur_val + neighbour[1]
+#                 heapq.heappush(visited, [neighbour[1], neighbour[0]])
+#     return min_dist
+
+
+# edges = [[2,1,1],[2,3,1],[3,4,1]]
+# start = 1
+# print(dijkstra_min_heap(edges, start))
+
+# topological sort
+def topological_sort(g):
+    res = []
+    # calculate in-degree for every node
+    in_degree = {k: 0 for k in g.keys()}
     for k in g.keys():
-        res[k] = 'inf'
-    res[s] = 0
-    length = len(g)
-    while len(visited) != length:
-        cur = min(res, key = lambda x: g[x])
+        for u in g[k]:
+            in_degree[u] += 1
+    # find node to start
+    s = set()
+    for k in in_degree.keys():
+        if in_degree[k] == 0:
+            s.add(k)
+    # loop
+    while s:
+        cur = s.pop()
+        res.append(cur)
         for node in g[cur]:
-            res[node] = min(res[node], res[cur] + g[cur][node])
-            visited.add(node)
-    return res[t]
+            in_degree[node] -= 1
+            if in_degree[node] == 0:
+                s.add(node)
+    return res
+
+
+# Unbounded knapsack problem
+def knapsack_unbd(max_weight, weight, profit):
+    dp = [[0 for _ in range(len(weight) + 1)] for _ in range(max_weight + 1)]
+    for i in range(1, len(dp)):
+        for j in range(1, len(dp[0])):
+            item_index = j - 1
+            if i - weight[j - 1] >= 0:
+                dp[i][j] = max(dp[i - weight[item_index]][j] + profit[item_index], dp[i][j - 1])
+            else:
+                dp[i][j] = dp[i][j - 1]
+    print(dp)
+    return dp[-1][-1]
+
+
+# 0/1 knapsack problem
+def knapsack01(max_weight, weight, profit):
+    dp = [[0 for _ in range(len(weight) + 1)] for _ in range(max_weight + 1)]
+    for i in range(1, len(dp)):
+        for j in range(1, len(dp[0])):
+            item_index = j - 1
+            if i - weight[j - 1] >= 0:
+                dp[i][j] = max(dp[i - weight[item_index]][j - 1] + profit[item_index], dp[i][j - 1])
+            else:
+                dp[i][j] = dp[i][j - 1]
+    print(dp)
+    return dp[-1][-1]
+
+
+max_weight = 5
+weight = [2, 1, 3, 2, 1]
+profit = [2, 2, 2, 1, 1]
+knapsack01(max_weight, weight, profit)

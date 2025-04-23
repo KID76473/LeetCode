@@ -312,25 +312,66 @@ class Solutions_LeetCode:
         #         return True
         # return False
 
-    # UNFINISHED!!!!!!!!!!!!!
     # 443. String Compression
+
     def compress(self, chars: List[str]) -> int:
-        chars += "!"  # place holder
-        result = []
-        last = chars[0]
-        count = 0
-        for c in chars:
-            if c == last:
-                count += 1
-            else:
-                result.append(last)
-                if count > 1:
-                    result.append(str(count))
-                count = 1
-            last = c
-        chars = result
-        print(chars)
-        return len(result)
+    # Too hard to debug and performance is not the best
+    #     def visit_i(index):
+    #         return chars[index] if index < len(chars) else ' '
+    #
+    #     if len(chars) == 1:
+    #         return 1
+    #     res = 0
+    #     ct = 1
+    #     i = 0
+    #     while i < len(chars):
+    #         cur = chars.pop(i)
+    #         if cur == visit_i(i):
+    #             ct += 1
+    #         else:
+    #             if ct > 1:
+    #                 digit_ct = 0
+    #                 # parsing the value with more than 1 digit and insert one by one
+    #                 while ct > 0:
+    #                     chars.insert(i, str(ct % 10))
+    #                     digit_ct += 1
+    #                     ct = ct // 10
+    #                 chars.insert(i, cur)
+    #                 res += digit_ct + 1  # includes ct of digit and ct of letter (1)
+    #                 i += digit_ct + 1  # includes ct of digit and ct of letter (1)
+    #             else:
+    #                 chars.insert(i, cur)
+    #                 res += 1
+    #                 i += 1
+    #             ct = 1
+    #     return res
+
+        write_idx = 0
+        i = 0
+        n = len(chars)
+
+        while i < n:
+            print(chars)
+            # 1) find the end of this run
+            j = i + 1
+            while j < n and chars[j] == chars[i]:
+                j += 1
+
+            # 2) write the character
+            chars[write_idx] = chars[i]
+            write_idx += 1
+
+            # 3) write the count (if >1), one digit per slot
+            count = j - i
+            if count > 1:
+                for digit in str(count):
+                    chars[write_idx] = digit
+                    write_idx += 1
+
+            # 4) move to the next run
+            i = j
+
+        return write_idx
 
     # 283. Move Zeroes
     def moveZeroes(self, nums: List[int]) -> None:
@@ -1895,3 +1936,290 @@ class Solutions_LeetCode:
             if cur_node.right:
                 q.append([cur_node.right, new_list])
         return res
+
+    # 207. Course Schedule
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        # g = {}
+        # for p, q in prerequisites:
+        #     if q not in g.keys():
+        #         g[q] = [p]
+        #     else:
+        #         g[q].append(p)
+        g = collections.defaultdict(list)
+        for p, q in prerequisites:
+            g[q].append(p)
+        for i in range(numCourses):
+            if i not in g.keys():
+                g[i] = []
+        def in_degree_0(g):
+            for k in g.keys():
+                if len(g[k]) == 0 and k not in visited:
+                    visited.add(k)
+                    return k
+            return -1
+        def topo():
+            num_in_degree_0 = in_degree_0(g)
+            ct = 0
+            while num_in_degree_0 != -1 and ct < numCourses:
+                for k in g.keys():
+                    if k != num_in_degree_0 and num_in_degree_0 in g[k]:
+                        g[k].remove(num_in_degree_0)
+                num_in_degree_0 = in_degree_0(g)
+                ct += 1
+            return True if ct == numCourses else False
+        visited = set()
+        return topo()
+
+    # 21. Merge Two Sorted Lists
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        res = ListNode()
+        c1, c2, c3 = list1, list2, res
+        while c1 and c2:
+            if c1.val < c2.val:
+                c3.next = ListNode(c1.val)
+                c3 = c3.next
+                c1 = c1.next
+            else:
+                c3.next = ListNode(c2.val)
+                c3 = c3.next
+                c2 = c2.next
+        if c1:
+            c3.next = c1
+        if c2:
+            c3.next = c2
+        res = res.next
+        return res
+
+    # 141. Linked List Cycle
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        # s = set()
+        # cur = head
+        # while cur:
+        #     if cur in s:
+        #         return True
+        #     else:
+        #         s.add(cur)
+        #         cur = cur.next
+        # return False
+        slow, fast = head, head
+        while fast:
+            slow = slow.next
+            if fast.next:
+                fast = fast.next.next
+            else:
+                return False
+            if slow == fast:
+                return True
+        return False
+
+    # 3. Longest Substring Without Repeating Characters
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        length = len(s)
+        if length == 0:
+            return 0
+        if length == 1:
+            return 1
+        i, j = 0, 1
+        mx = 1
+        ss = {s[i]}
+        while j < length:
+            if s[j] not in ss:
+                ss.add(s[j])
+                j += 1
+            else:
+                ss.add(s[j])
+                ss.remove(s[i])
+                i += 1
+            mx = max(mx, j - i)
+        return mx
+
+    # 743. Network Delay Time
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        # # Dijkstra using map O(n^2)
+        # # min distance of every node from s
+        # dist = {}
+        # for i in range(1, n + 1):
+        #     dist[i] = 10 ** 9
+        # dist[k] = 0
+        # # adjacency list of graph
+        # g = collections.defaultdict(list)
+        # for e in times:
+        #     g[e[0]].append(e[1])
+        # if len(g[k]) == 0:
+        #     return -1
+        # # loop
+        # visited = set()
+        # cur = k
+        # last_cur = -1
+        # while len(visited) < n:
+        #     # update neighbour from node with min cost
+        #     for nei in g[cur]:
+        #         value = -1
+        #         for e in times:
+        #             if e[0] == cur and e[1] == nei:
+        #                 value = e[2]
+        #         if dist[nei] > dist[cur] + value:
+        #             dist[nei] = dist[cur] + value
+        #     visited.add(cur)
+        #     # find the node with min cost
+        #     mn = 10 ** 9
+        #     last_cur = cur
+        #     for key in dist.keys():
+        #         if key not in visited and dist[key] < mn:
+        #             mn = dist[key]
+        #             cur = key
+        #     if last_cur == cur:
+        #         break
+        # # return -1 if some point not reachable
+        # if len(visited) < n:
+        #     return -1
+        # # find longest distance
+        # mxvl = -1
+        # for key in dist.keys():
+        #     if dist[key] > mxvl and dist[key] != 10 ** 9:
+        #         mxvl = dist[key]
+        # return mxvl
+
+        # Dijkstra using min heap (priority queue)
+        # Initialize distances with infinity
+        dist = {i: float('inf') for i in range(1, n + 1)}
+        dist[k] = 0
+
+        # Build the adjacency list with edge weights
+        g = collections.defaultdict(list)
+        for u, v, w in times:
+            g[u].append((v, w))
+
+        # Initialize the priority queue with the source node
+        pq = [(0, k)]
+        heapq.heapify(pq)
+
+        while pq:
+            cur_val, cur_node = heapq.heappop(pq)
+            if cur_val > dist[cur_node]:
+                continue
+            for nei, weight in g[cur_node]:
+                if dist[cur_node] + weight < dist[nei]:
+                    dist[nei] = dist[cur_node] + weight
+                    heapq.heappush(pq, (dist[nei], nei))
+
+        # Calculate the maximum distance
+        max_dist = max(dist.values())
+        return max_dist if max_dist < float('inf') else -1
+
+    # 234. Palindrome Linked List
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        # go to mid
+        slow, fast = head, head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        # reverse
+        prev = None
+        while slow:
+            temp = slow.next
+            slow.next = prev
+            prev = slow
+            slow = temp
+
+        left, right = head, prev
+        while right:
+            if left.val != right.val:
+                return False
+            left = left.next
+            right = right.next
+        return True
+
+    # 236. Lowest Common Ancestor of a Binary Tree
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def dfs(r):
+            if r:
+                left, right = None, None
+                if r == p:
+                    left = p
+                elif r == q:
+                    right = q
+                else:
+                    left = dfs(r.left)
+                    right = dfs(r.right)
+                if left and right:
+                    return r
+                return left if left else right
+
+        return dfs(root)
+
+    # 451. Sort Characters By Frequency
+    def frequencySort(self, s: str) -> str:
+        count = collections.Counter(s)
+        print(count)
+        d = collections.defaultdict(int)
+        for c in s:
+            d[c] += 1
+        print(d)
+        pq = []
+        for k in d.keys():
+            pq.append([d[k], k])
+        heapq.heapify(pq)
+        res = ""
+        while pq:
+            num, letter = heapq.heappop(pq)
+            for _ in range(num):
+                res = letter + res
+        return res
+
+    # 5. Longest Palindromic Substring
+    def longestPalindrome(self, s: str) -> str:
+        def check(center, double):
+            j = 1
+            result = ''
+            if double:
+                result = s[center: center + 2]
+                while center - j >= 0 and center + j + 1 < n:
+                    if s[center - j] == s[center + j + 1]:
+                        result = s[center - j] + result + s[center + j + 1]
+                    else:
+                        return result
+                    j += 1
+            else:
+                result = s[center]
+                while center - j >= 0 and center + j < n:
+                    if s[center - j] == s[center + j]:
+                        result = s[center - j] + result + s[center + j]
+                    else:
+                        return result
+                    j += 1
+            return result
+
+        n = len(s)
+        if n == 1: return s
+        res = ''
+        resLen = 0
+        for i in range(n - 1):
+            temp = check(i, False)
+            if len(temp) > resLen:
+                res = temp
+                resLen = len(res)
+            if s[i] == s[i + 1]:
+                temp = check(i, True)
+                if len(temp) > resLen:
+                    res = temp
+                    resLen = len(res)
+        return res
+
+    # 494. Target Sum
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        middle = sum(nums)
+        if target > middle:
+            return 0
+        ssum = middle * 2 + 1
+        dp = [[0 for _ in range(len(nums))] for _ in range(ssum)]
+        dp[middle - nums[0]][0] += 1
+        dp[middle + nums[0]][0] += 1
+        for n in range(1, len(nums)):
+            for s in range(len(dp)):
+                if s - nums[n] >= 0:
+                    dp[s][n] += dp[s - nums[n]][n - 1]
+                if s + nums[n] < ssum:
+                    dp[s][n] += dp[s + nums[n]][n - 1]
+        return dp[middle + target][-1]
