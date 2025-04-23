@@ -38,7 +38,7 @@ build/
 
 # Ignore custom solution files
 *.solution
-huawei_solution.py
+huawei.py
 oneline_assessment.py
 
 # Dependency file
