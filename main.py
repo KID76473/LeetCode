@@ -1,7 +1,7 @@
 import collections
 from typing import Optional, List
 from solutions import Solutions_LeetCode
-from oneline_assessment import Solution_oneline_assessment
+from online_assessment import Solution_oneline_assessment
 from huawei import huawei_solution
 
 

@@ -39,7 +39,7 @@ build/
 # Ignore custom solution files
 *.solution
 huawei.py
-oneline_assessment.py
+online_assessment.py
 
 # Dependency file
 pipfile.lock
