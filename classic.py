@@ -1,5 +1,6 @@
 # This file is to practice classical algorithm
 import heapq
+from collections import defaultdict
 
 
 # tree
@@ -190,10 +191,50 @@ def dijkstra_min_heap(edges, start):
 #                 heapq.heappush(visited, [neighbour[1], neighbour[0]])
 #     return min_dist
 
+def dijkstra(edges, start):
+    def find_min():
+        res, val = -1, float('inf')
+        for node in dist:
+            if node not in visited and dist[node] < val:
+                res = node
+                val = dist[node]
+        return res
+    g = defaultdict(list)
+    for u, v, w in edges:
+        g[u].append((v, w))
+        g[v].append((u, w))
+    dist = {u: float('inf')  for u in g}
+    dist[start] = 0
+    visited = set()
+    for _ in range(len(g)):
+        cur = find_min()
+        for u, v in g[cur]:
+            if dist[cur] + v < dist[u]:
+                dist[u] = dist[cur] + v
+        visited.add(cur)
+    return dist
 
-# edges = [[2,1,1],[2,3,1],[3,4,1]]
-# start = 1
-# print(dijkstra_min_heap(edges, start))
+def dijkstra_min_heap(edges, start):
+    g = defaultdict(list)
+    for node1, node2, weight in edges:
+        g[node1].append((node2, weight))
+        g[node2].append((node1, weight))
+    heap = [(0, start)]
+    heapq.heapify(heap)
+    dist = {node: float('inf') for node in g}
+    while heap:
+        cur_val, cur_node = heapq.heappop(heap)
+        if cur_val > dist[cur_node]:
+            continue
+        for neighbour, weight in g[cur_node]:
+            if dist[cur_node] + weight < dist[neighbour]:
+                dist[neighbour] = dist[cur_node] + weight
+                heapq.heappush(heap, (dist[cur_node] + weight, dist[neighbour]))
+
+
+edges = [[2,1,1],[2,3,1],[3,4,1]]
+start = 1
+print(dijkstra_min_heap(edges, start))
 
 # topological sort
 def topological_sort(g):
@@ -247,7 +288,7 @@ def knapsack01(max_weight, weight, profit):
     return dp[-1][-1]
 
 
-max_weight = 5
-weight = [2, 1, 3, 2, 1]
-profit = [2, 2, 2, 1, 1]
-knapsack01(max_weight, weight, profit)
+# max_weight = 5
+# weight = [2, 1, 3, 2, 1]
+# profit = [2, 2, 2, 1, 1]
+# knapsack01(max_weight, weight, profit)

@@ -761,23 +761,61 @@ class Solutions_LeetCode:
 
     # 206. Reverse Linked List
     def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        if not head:
+        if not head or not head.next:
             return head
-        cur = head
-        q = []
-        while cur:
-            q.append(cur.val)
-            cur = cur.next
-        # print(q)
-        res = ListNode()
-        cur = res
-        while len(q) > 0:
-            temp = q.pop()
-            # print(temp)
-            cur.next = ListNode(temp, None)
-            cur = cur.next
-        res = res.next
-        return res
+        if not head.next.next:
+            node = head
+            head = head.next
+            head.next = node
+            node.next = None
+            return head
+
+        # # method 1
+        # pre, cur, nex = head, head.next, head.next.next
+        # while nex:
+        #     cur.next = pre
+        #     pre = cur
+        #     cur = nex
+        #     nex = nex.next
+        # return cur
+
+        # method 2
+        pre, cur, nex = None, head, head.next
+        while nex:
+            cur.next = pre
+            pre = cur
+            cur = nex
+            nex = nex.next
+        cur.next = pre
+        return cur
+
+        # # a fancy way
+        # node = None
+        # while head:
+        #     temp = head.next
+        #     head.next = node
+        #     node = head
+        #     head = temp
+        # return node
+
+        # # using extra space
+        # if not head:
+        #     return head
+        # cur = head
+        # q = []
+        # while cur:
+        #     q.append(cur.val)
+        #     cur = cur.next
+        # # print(q)
+        # res = ListNode()
+        # cur = res
+        # while len(q) > 0:
+        #     temp = q.pop()
+        #     # print(temp)
+        #     cur.next = ListNode(temp, None)
+        #     cur = cur.next
+        # res = res.next
+        # return res
 
     # 2130. Maximum Twin Sum of a Linked List
     def pairSum(self, head: Optional[ListNode]) -> int:
@@ -1398,6 +1436,15 @@ class Solutions_LeetCode:
             dp[i] = min(dp[i - 2], dp[i - 1]) + cost[i]
         return min(dp[-1], dp[-2])
 
+        # another try
+        # length = len(cost)
+        # if length < 3:
+        #     return min(cost)
+        # dp = [i for i in cost]
+        # for i in range(2, length):
+        #     dp[i] += min(dp[i - 1], dp[i - 2])
+        # return min(dp[-1], dp[-2])
+
     # 198. House Robber
     def rob(self, nums: List[int]) -> int:
         length = len(nums)
@@ -1442,8 +1489,6 @@ class Solutions_LeetCode:
             else:
                 dp[i] = prices[i] - cur_min
         return max(dp)
-
-    # 714. Best Time to Buy and Sell Stock with Transaction Fee NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     # 435. Non-overlapping Intervals NOT FINISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
@@ -2209,17 +2254,62 @@ class Solutions_LeetCode:
 
     # 494. Target Sum
     def findTargetSumWays(self, nums: List[int], target: int) -> int:
-        middle = sum(nums)
-        if target > middle:
-            return 0
-        ssum = middle * 2 + 1
-        dp = [[0 for _ in range(len(nums))] for _ in range(ssum)]
-        dp[middle - nums[0]][0] += 1
-        dp[middle + nums[0]][0] += 1
-        for n in range(1, len(nums)):
-            for s in range(len(dp)):
-                if s - nums[n] >= 0:
-                    dp[s][n] += dp[s - nums[n]][n - 1]
-                if s + nums[n] < ssum:
-                    dp[s][n] += dp[s + nums[n]][n - 1]
-        return dp[middle + target][-1]
+        dp = {}
+        length = len(nums)
+
+        def backtrack(i, s):
+            if i == length:
+                return 1 if s == target else 0
+            if (i, s) in dp:
+                return dp[(i, s)]
+            dp[(i, s)] = backtrack(i + 1, s - nums[i]) + backtrack(i + 1, s + nums[i])
+            return dp[(i, s)]
+
+        return backtrack(0, 0)
+
+        # middle = sum(nums)  # the index of value 0
+        # if target > middle:
+        #     return 0
+        # ssum = middle * 2 + 1
+        # dp = [[0 for _ in range(len(nums))] for _ in range(ssum)]
+        # dp[middle - nums[0]][0] += 1
+        # dp[middle + nums[0]][0] += 1
+        # for n in range(1, len(nums)):
+        #     for s in range(len(dp)):
+        #         if s - nums[n] >= 0:
+        #             dp[s][n] += dp[s - nums[n]][n - 1]
+        #         if s + nums[n] < ssum:
+        #             dp[s][n] += dp[s + nums[n]][n - 1]
+        # return dp[middle + target][-1]
+
+    # 790. Domino and Tromino Tiling
+    # dp[n] = dp[n - 1] + dp[n - 2] + 2 * (dp[n - 3] + ... + dp[0])
+    #       = dp[n - 1] + dp[n - 2] + dp[n - 3] + dp[n - 3] + 2 * (dp[n - 4] + ... + dp[0])
+    #       = dp[n - 1] + dp[n - 3] + dp[n - 1]
+    #       = 2 * dp[n - 1] + dp[n - 3]
+    def numTilings(self, n: int) -> int:
+        MOD = 10 ** 9 + 7
+        if n == 1: return 1
+        if n == 2: return 2
+        if n == 3: return 5
+        dp = [0] * (n + 1)
+        dp[1], dp[2], dp[3] = 1, 2, 5
+        for i in range(4, n + 1):
+            dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD
+        return dp[n]
+
+    # 714. Best Time to Buy and Sell Stock with Transaction Fee
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        return 0
+
+    # 139. Word Break
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        length = len(s)
+        dp = [True] + [False] * length
+        for i in range(1, length + 1):
+            for w in wordDict:
+                start = i - len(w)
+                if start >= 0 and dp[start] and s[start: i] == w:
+                    dp[i] = True
+                    break
+        return dp[-1]
