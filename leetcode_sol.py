@@ -1446,7 +1446,7 @@ class Solutions_LeetCode:
         # return min(dp[-1], dp[-2])
 
     # 198. House Robber
-    def rob(self, nums: List[int]) -> int:
+    def rob1(self, nums: List[int]) -> int:
         length = len(nums)
         if length < 2:
             return nums[0]
@@ -2313,3 +2313,42 @@ class Solutions_LeetCode:
                     dp[i] = True
                     break
         return dp[-1]
+
+    # 213. House Robber II
+    def rob2(self, nums: List[int]) -> int:
+        def get_max(nums):
+            prev = cur_max = 0
+            for cur_val in nums:
+                temp = max(cur_max, prev + cur_val)
+                prev = cur_max
+                cur_max = temp
+            return cur_max
+
+        return max(get_max(nums[:-1]), get_max(nums[1:]), nums[0])
+
+        # n = len(nums)
+        # if n == 1:
+        #     return nums[0]
+        # elif n == 2:
+        #     return max(nums)
+        # dp1, dp2 = [0] * n, [0] * n
+        # dp1[0], dp1[1] = nums[0], max(nums[0], nums[1])
+        # dp2[1] = nums[1]
+        # for i in range(2, n - 1):
+        #     dp1[i] = max(dp1[i - 1], dp1[i - 2] + nums[i])
+        #     dp2[i] = max(dp2[i - 1], dp2[i - 2] + nums[i])
+        # dp2[-1] = max(dp2[-3] + nums[-1], dp2[-2])
+        # return max(dp1[-2], dp2[-1])
+
+    # 337. House Robber III
+    def rob3(self, root: Optional[TreeNode]) -> int:
+        def loop(cur):
+            left = right = [0, 0]  # [val without current, val with current]
+            if cur.left:
+                left = loop(cur.left)
+            if cur.right:
+                right = loop(cur.right)
+            # print(cur.val, [left[1] + right[1] + cur.val, max(left) + max(right)])
+            return [left[1] + right[1] + cur.val, max(left) + max(right)]
+
+        return max(loop(root))
