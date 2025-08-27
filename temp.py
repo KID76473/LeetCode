@@ -1,6 +1,6 @@
-a = [0]
+import bisect
 
-# print(a[1])  # IndexError: list index out of range
-# print(a[-2])  # IndexError: list index out of range
-print(a[0: 2])  # [0]
-print(a[1: 345])  # []
+a = [1, 3, 5]
+print(bisect.bisect(a, 3))
+print(bisect.bisect_left(a, 3))
+print(bisect.bisect_right(a, 3))

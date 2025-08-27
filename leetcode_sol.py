@@ -2352,3 +2352,138 @@ class Solutions_LeetCode:
             return [left[1] + right[1] + cur.val, max(left) + max(right)]
 
         return max(loop(root))
+
+    # 91. Decode Ways
+    def numDecodings(self, s: str) -> int:
+        n = len(s)
+        if s[0] == '0':
+            return 0
+        if n < 2:
+            return 1
+        dp = [0] * n
+        dp[0] = 1
+        if int(s[: 2]) <= 26:
+            if s[1] == '0':
+                dp[1] = 1
+            else:
+                dp[1] = 2
+        else:
+            if s[1] == '0':
+                return 0
+            else:
+                dp[1] = 1
+        for i in range(2, n):
+            if s[i - 1] == '0':
+                if s[i] == '0':
+                    return 0
+                else:
+                    dp[i] = dp[i - 1]
+            elif int(s[i - 1: i + 1]) <= 26:
+                if s[i] == '0':
+                    dp[i] = dp[i - 2]
+                else:
+                    dp[i] = dp[i - 1] + dp[i - 2]
+            else:
+                if s[i] == '0':
+                    return 0
+                else:
+                    dp[i] = dp[i - 1]
+        return dp[-1]
+
+    # 96. Unique Binary Search Trees
+    def numTrees(self, n: int) -> int:
+        dp = [1] * (n + 1)
+        for i in range(2, n + 1):
+            cur = 0
+            for j in range(1, i + 1):
+                cur += dp[j - 1] * dp[i - j]
+            dp[i] = cur
+        return dp[-1]
+
+    # 322. Coin Change
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        if amount == 0:
+            return 0
+        dp = [float('inf')] * (amount + 1)
+        for c in coins:
+            if c <= amount:
+                dp[c] = 1
+        for i in range(amount + 1):
+            for c in coins:
+                if i - c >= 0 and dp[i - c] > 0 and dp[i - c] + 1 < dp[i]:
+                    dp[i] = dp[i - c] + 1
+        return dp[-1] if dp[-1] != float('inf') else -1
+
+    # 518. Coin Change II
+    def change(self, amount: int, coins: List[int]) -> int:
+        dp = [0] * (amount + 1)
+        dp[0] = 1
+
+        for c in coins:
+            for a in range(c,
+                           amount + 1):  # I updated my code here. (start from c and remove if statement. In the video, start from 1).
+                dp[a] += dp[a - c]
+
+        return dp[amount]
+
+        # n = len(coins)
+        # dp = [[0] * (amount + 1) for _ in range(n)]
+        # for i in range(n):
+        #     dp[i][0] = 1
+        # index = 0
+        # while index <= amount:
+        #     dp[0][index] = 1
+        #     index += coins[0]
+        # for i in range(1, n):
+        #     for num in range(amount + 1):
+        #         dp[i][num] = dp[i - 1][num]
+        #         if num >= coins[i]:
+        #             dp[i][num] += dp[i][num - coins[i]]
+        # return dp[-1][-1]
+
+    # 128. Longest Consecutive Sequence
+    def longestConsecutive(self, nums: List[int]) -> int:
+        num_set = set()
+        for x in nums:
+            num_set.add(x)
+        res = 0
+        for x in num_set:
+            if x - 1 not in num_set:
+                num = x + 1
+                cur = 1
+                while num in num_set:
+                    num += 1
+                    cur += 1
+                res = max(res, cur)
+        return res
+
+    # 560. Subarray Sum Equals K
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        res = cur = 0
+        pre_map = {0: 1}
+        for num in nums:
+            cur += num
+            if cur - k in pre_map:
+                res += pre_map[cur - k]
+            pre_map[cur] = 1 + pre_map.get(cur, 0)
+        return res
+
+    # 523. Continuous Subarray Sum
+    def checkSubarraySum(self, nums: List[int], k: int) -> bool:
+        if len(nums) < 2:
+            return False
+        for i in range(len(nums) - 1):
+            if nums[i] == 0 and nums[i + 1] == 0:
+                return True
+        prefix = [0]
+        first = {0: -1}
+        cur = 0
+        for i in range(len(nums)):
+            cur += nums[i]
+            r = cur % k
+            if r in first:
+                if i - first[r] >= 2:
+                    return True
+            else:
+                first[r] = i
+        return False
