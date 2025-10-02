@@ -225,16 +225,18 @@ def dijkstra_min_heap(edges, start):
     while heap:
         cur_val, cur_node = heapq.heappop(heap)
         if cur_val > dist[cur_node]:
+            print('---')
             continue
         for neighbour, weight in g[cur_node]:
             if dist[cur_node] + weight < dist[neighbour]:
                 dist[neighbour] = dist[cur_node] + weight
                 heapq.heappush(heap, (dist[cur_node] + weight, dist[neighbour]))
+    return dist
 
 
-edges = [[2,1,1],[2,3,1],[3,4,1]]
-start = 1
-print(dijkstra_min_heap(edges, start))
+# edges = [[2,1,1],[2,3,1],[3,4,1]]
+# start = 1
+# print(dijkstra_min_heap(edges, start))
 
 # topological sort
 def topological_sort(g):
@@ -292,3 +294,31 @@ def knapsack01(max_weight, weight, profit):
 # weight = [2, 1, 3, 2, 1]
 # profit = [2, 2, 2, 1, 1]
 # knapsack01(max_weight, weight, profit)
+
+
+def dijkstra(edges, start):
+    g = defaultdict(list)
+    for (u, v, w) in edges:
+        g[u].append([v, w])
+        g[v].append([u, w])
+    # print(g)
+    h = [[0, start]]
+    heapq.heapify(h)
+    dist = {u: float('inf') for u in g}
+    dist[start] = 0
+    while h:
+        cur_dist, cur = heapq.heappop(h)
+        if cur_dist > dist[cur]:
+            continue
+        print(f'node: {cur}, dist: {cur_dist}')
+        for nei, nei_dist in g[cur]:
+            new_dist = cur_dist + nei_dist
+            if new_dist < dist[nei]:
+                dist[nei] = new_dist
+                heapq.heappush(h, [new_dist, nei])
+    return dist
+
+
+edges = [[1,3,1],[1,4,2],[1,2,5],[1,3,1],[2,3,2],[2,4,3],[3,5,7],[4,5,2]]
+start = 1
+print(dijkstra(edges, start))

@@ -438,4 +438,21 @@ def swap(numbers):
             res += 1
     return res
 
+# 给定一个正整数数组 nums 和一个目标值k，断是否存在一个连续子数组，其元素之和恰好等于k
+def subarray1(nums, k):
+    cur = nums[0]
+    n = len(nums)
+    for i in range(n):
+        j = i
+        while j < n and cur < k:
+            cur += nums[j]
+            j += 1
+        if cur > k:
+            cur -= nums[i]
+        else:
+            return True
+    return False
 
+a = [1, 3, 4, 2, 4]
+b = 10
+print(subarray1(a, b))

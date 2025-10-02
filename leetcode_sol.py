@@ -4,6 +4,7 @@ import math
 import heapq
 from typing import List
 from typing import Optional
+from collections import defaultdict, deque
 
 
 class ListNode:
@@ -114,13 +115,25 @@ class Solutions_LeetCode:
     # 300
     # DOT NOT UNDERSTAND DICHOTOMY
     def lengthOfLIS(self, nums: List[int]) -> int:
-        dp = [1]
-        for i in range(len(nums)):
-            dp.append(1)
-            for j in range(i):
-                if nums[i] > nums[j]:
-                    dp[i] = max(dp[j] + 1, dp[i])
-        return max(dp)
+        res = 0
+        dp = []
+        for num in nums:
+            idx = bisect.bisect_left(dp, num)
+            if idx < res:
+                dp[idx] = num
+            else:
+                dp.append(num)
+                res += 1
+        return res
+
+        # dp = [1]
+        # for i in range(len(nums)):
+        #     dp.append(1)
+        #     for j in range(i):
+        #         if nums[i] > nums[j]:
+        #             dp[i] = max(dp[j] + 1, dp[i])
+        # return max(dp)
+
         # length = max_length = 1
         # prev = nums[0]
         # for i in range(0, len(nums) - 1):
@@ -653,9 +666,7 @@ class Solutions_LeetCode:
         #         i += 1
         #     print(stack)
         # return stack
-    # 394. Decode String
-    def decodeString(self, s: str) -> str:
-        return "NOT FINISHED"
+
 
     # 649. Dota2 Senate
     def predictPartyVictory(self, senate: str) -> str:
@@ -1859,29 +1870,6 @@ class Solutions_LeetCode:
         #     res += max(0, temp - height[i])
         # return res
 
-    # 15. 3Sum
-    def threeSum(self, nums: List[int]) -> List[List[int]]:
-        res = []
-        nums.sort()
-        n = len(nums)
-        for i in range(n):
-            if i > 0 and nums[i] == nums[i - 1]:
-                continue
-            j = i + 1
-            k = n - 1
-            while j < k:
-                total = nums[i] + nums[j] + nums[k]
-                if total == 0:
-                    res.append([nums[i], nums[j], nums[k]])
-                    j += 1
-                    while nums[j] == nums[j - 1] and j < k:
-                        j += 1
-                elif total < 0:
-                    j += 1
-                else:
-                    k -= 1
-        return res
-
     # 125. Valid Palindrome
     def isPalindrome(self, s: str) -> bool:
         # s = ''.join(c.lower() for c in s if c.isalnum())
@@ -2420,8 +2408,8 @@ class Solutions_LeetCode:
         dp[0] = 1
 
         for c in coins:
-            for a in range(c,
-                           amount + 1):  # I updated my code here. (start from c and remove if statement. In the video, start from 1).
+            # I updated my code here. (start from c and remove if statement. In the video, start from 1).
+            for a in range(c,amount + 1):
                 dp[a] += dp[a - c]
 
         return dp[amount]
@@ -2487,3 +2475,647 @@ class Solutions_LeetCode:
             else:
                 first[r] = i
         return False
+
+    # 146. LRU Cache
+    class LRUCache:
+        class Node:
+            def __init__(self, val: int, prev=None, next=None):
+                self.val = val
+                self.next = next
+                self.prev = prev
+
+        def print_all(self):
+            cur = self.head.next
+            while cur and cur.val != -2:
+                print(cur.val)
+                cur = cur.next
+
+        def __init__(self, capacity: int):
+            self.d = {}
+            self.cap = capacity
+            self.head = self.Node(-2)
+            self.tail = self.Node(-2, prev=self.head)
+            self.head.next = self.tail
+            # self.len = 0
+
+        def move(self, node):
+            # remove node from its prev and its next
+            node.prev.next = node.next
+            node.next.prev = node.prev
+            # let node point to head and previous first
+            node.prev = self.head
+            node.next = self.head.next
+            # plug in node after head
+            self.head.next.prev = node
+            self.head.next = node
+
+        def get(self, key: int) -> int:
+            if key in self.d:
+                value, node = self.d[key]
+                self.move(node)
+                return value
+            return -1
+
+        def put(self, key: int, value: int) -> None:
+            if key in self.d:  # update
+                self.d[key][0] = value
+                node = self.d[key][1]
+                self.move(node)
+            else:  # add new element
+                node = self.Node(key, prev=self.head, next=self.head.next)
+                self.d[key] = [value, node]
+                self.head.next.prev = node
+                self.head.next = node
+                if len(self.d) > self.cap:
+                    del self.d[self.tail.prev.val]
+                    self.tail.prev.prev.next = self.tail
+                    self.tail.prev = self.tail.prev.prev
+
+
+    # 1413. Minimum Value to Get Positive Step by Step Sum
+    def minStartValue(self, nums: List[int]) -> int:
+        res = 1
+        cur = 1
+        for num in nums:
+            cur += num
+            if cur <= 0:
+                res += -cur + 1
+                cur = 1
+        return res
+
+
+    # 981. Time Based Key-Value Store
+    class TimeMap:
+        def __init__(self):
+            self.list = {}
+
+        def find(self, arr, idx):
+            l, h = 0, len(arr) - 1
+            res = -1
+            while l <= h:
+                m = (l + h) // 2
+                print(f'm: {m}')
+                val = arr[m][0]
+                if val == idx:
+                    return m
+                elif val < idx:
+                    res = l
+                    l = m + 1
+                else:
+                    h = m - 1
+            return res
+
+        def insert_idx(self, arr, idx):
+            l, h = 0, len(arr) - 1
+            while l <= h:
+                m = (l + h) // 2
+                print(f'm: {m}')
+                val = arr[m][0]
+                if val == idx:
+                    return m
+                elif val < idx:
+                    l = m + 1
+                else:
+                    h = m - 1
+            return l
+
+        def set(self, key: str, value: str, timestamp: int):
+            if key not in self.list:
+                self.list[key] = [[timestamp, value]]
+            else:
+                idx = self.insert_idx(self.list[key], timestamp)
+                print(idx)
+                self.list[key].insert(idx, [timestamp, value])
+            print(self.list)
+
+        def get(self, key: str, timestamp: int) -> str:
+            idx = self.find(self.list[key], timestamp)
+            if idx == -1:
+                idx = len(self.list[key]) - 1
+            print(idx)
+            print(self.list)
+            return self.list[key][idx][1]
+
+
+    # 269. Alien Dictionary
+    def foreignDictionary(self, words: List[str]) -> str:
+        class Node:
+            def __init__(self, c):
+                self.c = c
+                self.next = []
+
+        # construct dict letter: node
+        d = {}
+        for w in words:
+            for c in w:
+                if c not in d:
+                    d[c] = Node(c)
+        print(d)
+
+        def helper(w1, w2):
+            for c1, c2 in zip(w1, w2):
+                if c1 != c2:
+                    d[c1].next.append(d[c2])
+                    return
+
+        # construct graph
+        for i in range(len(words) - 1):
+            if len(words[i]) > len(words[i + 1]) and words[i].startswith(words[i + 1]):
+                return ''
+            helper(words[i], words[i + 1])
+
+        # initialize
+        d2 = defaultdict(int)
+        for w in words:
+            for c in w:
+                d2[c] = 0
+
+        # count indegree
+        for node in d:
+            for nei in d[node].next:
+                d2[nei.c] += 1
+        print(d2)
+
+        # get all indegree-0 nodes
+        q = deque([letter for letter in d2 if d2[letter] == 0])
+        print(q)
+        if len(q) == len(d):
+            if len(q) == 1:
+                return q[0]
+            else:
+                return ''
+
+        # loop thru graph
+        res = ''
+        while q:
+            cur = q.popleft()
+            print(cur)
+            res += cur
+            print(f'looping thru neighbour of {cur}')
+            for node in d[cur].next:
+                print(node.c)
+                d2[node.c] -= 1
+                if d2[node.c] == 0:
+                    q.append(node.c)
+
+        # cycle
+        for letter in d2:
+            if d2[letter] != 0:
+                return ''
+
+        return res
+
+    # 56. Merge Intervals
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort()
+        cur = intervals[0]
+        res = []
+        n = len(intervals)
+        for i in range(1, n):
+            if cur[0] <= intervals[i][0] <= cur[1]:
+                cur[1] = max(cur[1], intervals[i][1])
+            else:
+                res.append(cur)
+                cur = intervals[i]
+        res.append(cur)
+        return res
+
+    # 152. Maximum Product Subarray
+    def maxProduct(self, nums: List[int]) -> int:
+        mx = mn = res = nums[0]
+        for num in nums[1:]:
+            prev_mx, pre_mn = mx, mn
+            mx = max(prev_mx * num, pre_mn * num, num)
+            mn = min(prev_mx * num, pre_mn * num, num)
+            res = max(res, mx)
+        return res
+
+    # 235. Lowest Common Ancestor of a Binary Search Tree
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if root:
+            if min(p.val, q.val) <= root.val <= max(p.val, q.val):
+                return root
+            if p.val < root.val:
+                return self.lowestCommonAncestor(root.left, p, q)
+            else:
+                return self.lowestCommonAncestor(root.right, p, q)
+        return
+
+    # 845. Longest Mountain in Array
+    def longestMountain(self, arr: List[int]) -> int:
+        # space: O(1). find the peak first
+        i = 1
+        n = len(arr)
+        res = 0
+        while i < n - 1:
+            is_peak = arr[i - 1] < arr[i] > arr[i + 1]
+            if not is_peak:
+                i += 1
+                continue
+            j = i - 1
+            while j > 0 and arr[j - 1] < arr[j]:
+                j -= 1
+            val = i - j
+            j = i + 1
+            while j + 1 < n and arr[j + 1] < arr[j]:
+                j += 1
+            val += j - i + 1
+            res = max(res, val)
+            i = j
+        return res
+
+        # # space: O(n)
+        # n = len(arr)
+        # if n < 3:
+        #     return 0
+        # up, down = [0 for _ in range(n)], [0 for _ in range(n)]
+        # res = 0
+        # for i in range(n - 1):
+        #     if arr[i + 1] > arr[i]:
+        #         up[i + 1] = up[i] + 1
+        #     if arr[n - 1 - i - 1] > arr[n - 1 - i]:
+        #         down[n - 1 - i - 1] = down[n - 1 - i] + 1
+        # for i in range(n):
+        #     if up[i] != 0 and down[i] != 0:
+        #         res = max(res, up[i] + down[i] + 1)
+        # return res
+
+    # 101. Symmetric Tree
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        def mirror(l, r):
+            if not l and not r:
+                return True
+            if not l or not r:
+                return False
+            return l.val == r.val and mirror(l.left, r.right) and mirror(l.right, r.left)
+
+        return mirror(root.left, root.right)
+
+        # def check(arr):
+        #     i, j = 0, len(arr) - 1
+        #     while i <= j:
+        #         if arr[i].val != arr[j].val:
+        #             return False
+        #         i += 1
+        #         j -= 1
+        #     return True
+        # def bfs(r):
+        #     q = [[r, 0]]
+        #     lv = []
+        #     last = 0
+        #     while q:
+        #         cur, cur_lv = q.pop(0)
+        #         if last != cur_lv:
+        #             if not check(lv):
+        #                 return False
+        #             lv = []
+        #             last = cur_lv
+        #         if cur.left:
+        #             q.append([cur.left, cur_lv + 1])
+        #             lv.append(cur.left)
+        #         else:
+        #             lv.append(TreeNode(-111))
+        #         if cur.right:
+        #             q.append([cur.right, cur_lv + 1])
+        #             lv.append(cur.right)
+        #         else:
+        #             lv.append(TreeNode(-111))
+        #     return True
+        # return bfs(root)
+
+    # 103. Binary Tree Zigzag Level Order Traversal
+    def zigzagLevelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        res = []
+        q = [[root, 0]]
+        left2right = True
+        last = -1
+        temp = deque([root.val])
+        while q:
+            cur, cur_lv = q.pop(0)
+            if last != cur_lv:
+                left2right = not left2right
+                res.append(list(temp))
+                temp = deque([])
+                last = cur_lv
+            if left2right:
+                if cur.left:
+                    q.append([cur.left, cur_lv + 1])
+                    temp.append(cur.left.val)
+                if cur.right:
+                    q.append([cur.right, cur_lv + 1])
+                    temp.append(cur.right.val)
+            else:
+                if cur.left:
+                    q.append([cur.left, cur_lv + 1])
+                    temp.appendleft(cur.left.val)
+                if cur.right:
+                    q.append([cur.right, cur_lv + 1])
+                    temp.appendleft(cur.right.val)
+        return res
+
+    # 110. Balanced Binary Tree
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        temp = [1]
+
+        def helper(r, lv):
+            if not r:
+                return lv - 1
+            elif not (r.left or r.right):
+                return lv
+            else:
+                dl = helper(r.left, lv + 1)
+                dr = helper(r.right, lv + 1)
+                if abs(dl - dr) > 1:
+                    temp[0] = 0
+                return max(dr, dl)
+
+        depth = helper(root, 0)
+        return temp[0] == 1
+
+    # 112. Path Sum
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        def helper(r, cur):
+            if r:
+                if not (r.left or r.right):
+                    if cur + r.val == targetSum:
+                        res[0] = True
+                if r.left:
+                    helper(r.left, cur + r.val)
+                if r.right:
+                    helper(r.right, cur + r.val)
+
+        res = [False]
+        helper(root, 0)
+        return res[0]
+
+    # 113. Path Sum II
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> List[List[int]]:
+        def helper(r, cur, path):
+            if r:
+                path.append(r.val)
+                # print(r.val, path)
+                cur_sum = cur + r.val
+                if not (r.left or r.right):  # no child
+                    if cur_sum == targetSum:
+                        res.append(path.copy())
+                if r.left:
+                    helper(r.left, cur_sum, path)
+                if r.right:
+                    helper(r.right, cur_sum, path)
+                path.pop()
+
+        res = []
+        helper(root, 0, [])
+        return res
+
+    # 22. Generate Parentheses
+    def generateParenthesis(self, n: int) -> List[str]:
+        res = []
+        stack = []
+
+        def helper(a, b):
+            if a == b == n:
+                res.append(''.join(stack))
+                return
+            if a > b:  # can add ) more open used than close
+                stack.append(')')
+                helper(a, b + 1)
+                stack.pop()
+            if a < n:  # can add ( as long as we have
+                stack.append('(')
+                helper(a + 1, b)
+                stack.pop()
+
+        helper(0, 0)
+        return res
+
+    # 78. Subsets
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        res = [[]]
+        n = len(nums)
+
+        def helper(idx, stack):
+            if idx < n and nums[idx] not in stack:
+                stack.append(nums[idx])
+                res.append(stack.copy())
+                for j in range(idx + 1, n):
+                    helper(j, stack)
+                    stack.pop()
+
+        for i in range(n):
+            helper(i, [])
+        return res
+
+    # 394. Decode String
+    def decodeString(self, s: str) -> str:
+        res = ''
+        ct = 0
+        stack = []
+        for c in s:
+            if c.isdigit():
+                ct = ct * 10 + int(c)
+            elif c == '[':
+                stack.append([ct, res])
+                ct = 0
+                res = ''
+            elif c == ']':
+                temp, cur = stack.pop()
+                res = cur + temp * res
+            else:
+                res += c
+        return res
+
+
+    # 200. Number of Islands
+    def numIslands(self, grid: List[List[str]]) -> int:
+        res = 0
+        m, n = len(grid), len(grid[0])
+        visited = [[0] * n for _ in range(m)]
+
+        def bfs(x, y):
+            q = deque([[x, y]])
+            ways = [[0, -1], [0, 1], [1, 0], [-1, 0]]
+            while q:
+                i, j = q.popleft()
+                for w in ways:
+                    k, l = i + w[0], j + w[1]
+                    if 0 <= k < m and 0 <= l < n and grid[k][l] == '1' and visited[k][l] == 0:
+                        q.append([k, l])
+                        visited[k][l] = 1
+
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == '1' and visited[i][j] == 0:
+                    visited[i][j] = 1
+                    res += 1
+                    bfs(i, j)
+        return res
+
+    # 2856. Minimum Array Length After Pair Removals
+    def minLengthAfterRemovals(self, nums: List[int]) -> int:
+        towers = []
+        d = {}
+        for num in nums:
+            if num in d:
+                d[num] += 1
+            else:
+                d[num] = 1
+        h = []
+        for key in d:
+            h.append([-d[key], key])
+        heapq.heapify(h)
+        while len(h) > 1:
+            mxv, mx = heapq.heappop(h)
+            tempv, temp = heapq.heappop(h)
+            if mxv + 1 < 0:
+                heapq.heappush(h, [mxv + 1, mx])
+            if tempv + 1 < 0:
+                heapq.heappush(h, [tempv + 1, temp])
+        return -h[0][0] if h else 0
+
+    # 279. Perfect Squares
+    def numSquares(self, n: int) -> int:
+        dp = [float('inf')] * n
+        dp[0] = 1
+        sq = []
+        for i in range(1, int(math.sqrt(n)) + 1):
+            sq.append(i * i)
+        for i in range(1, n):
+            num = i + 1
+            if num in sq:
+                dp[i] = 1
+            else:
+                for s in sq:
+                    dp[i] = min(dp[i], dp[i - s] + 1)
+        return dp[-1]
+
+    # 72. Edit Distance
+    def minDistance(self, word1: str, word2: str) -> int:
+        l1, l2 = len(word1), len(word2)
+        dp = [[0] * (l1 + 1) for _ in range(l2 + 1)]
+
+        for i in range(l1 + 1):
+            dp[0][i] = i
+        for i in range(l2 + 1):
+            dp[i][0] = i
+
+        for i in range(1, l2 + 1):
+            for j in range(1, l1 + 1):
+                if word1[j - 1] == word2[i - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
+        return dp[-1][-1]
+
+    # 416. Partition Equal Subset Sum
+    def canPartition(self, nums: List[int]) -> bool:
+        target = sum(nums)
+        if target % 2 != 0:
+            return False
+        target = int(target / 2)
+        dp = [0] * (target + 1)
+        dp[0] = 1
+        for i in range(1, target + 1):
+            if i == nums[0]:
+                dp[i] = 1
+        for i in range(1, len(nums)):
+            # print(dp)
+            temp = [1]
+            for j in range(1, target + 1):
+                if j - nums[i] >= 0 and dp[j - nums[i]] == 1 or dp[j] == 1:
+                    temp.append(1)
+                else:
+                    temp.append(0)
+            dp = temp
+        # print(dp)
+        return dp[-1] == 1
+
+
+    # 1060. Missing Element in a Sorted List
+    # NOT FINISHED!!!!!!
+    def sol(self, nums):
+        l, r, length = 0, len(nums) - 1, len(nums)
+        while r - l > 2:
+            m = (l + r) // 2
+            mid_num = (nums[l] + nums[r]) // 2
+            if mid_num not in nums:
+                return mid_num
+            if nums[m] > mid_num:
+                r = m - 1
+            else:
+                l = m + 1
+        return nums[l] + 1
+
+    # 2. Add Two Numbers
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        last = 0
+        c1, c2 = l1, l2
+        res = ListNode(-1)
+        cur = res
+        while c1 or c2 or last == 1:
+            v1 = c1.val if c1 else 0
+            v2 = c2.val if c2 else 0
+            sm = v1 + v2 + last
+            cur.next = ListNode(sm % 10)
+            last = sm // 10
+            cur = cur.next
+            c1 = c1.next if c1 else None
+            c2 = c2.next if c2 else None
+        return res.next
+
+    # 15. 3Sum
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        res = []
+        nums.sort()
+        n = len(nums)
+        for i in range(n):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            j = i + 1
+            k = n - 1
+            while j < k:
+                total = nums[i] + nums[j] + nums[k]
+                if total == 0:
+                    res.append([nums[i], nums[j], nums[k]])
+                    j += 1
+                    while nums[j] == nums[j - 1] and j < k:
+                        j += 1
+                elif total < 0:
+                    j += 1
+                else:
+                    k -= 1
+        return res
+    
+    # 18. 4Sum
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+        cur, res = [], []
+        n = len(nums)
+        nums.sort()
+
+        def helper(k, start, t):
+            if k > 2:
+                for i in range(start, n):
+                    if i > start and nums[i] == nums[i - 1]:
+                        continue
+                    cur.append(nums[i])
+                    helper(k - 1, i + 1, t - nums[i])
+                    cur.pop()
+            else:
+                i, j = start, n - 1
+                while i < j:
+                    total = nums[i] + nums[j]
+                    if t == total:
+                        res.append([*cur, nums[i], nums[j]])
+                        i += 1
+                        while i < j and nums[i] == nums[i - 1]:
+                            i += 1
+                    if t > total:
+                        i += 1
+                    else:
+                        j -= 1
+
+        helper(4, 0, target)
+        return res
+    

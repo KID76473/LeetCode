@@ -71,12 +71,27 @@ def main():
             dfs(root.left)
             dfs(root.right)
 
-    nums = [1,1,1,1,1]
-    nums = [0]
-    target = 5
-    target = 0
-    print(Solutions_LeetCode().findTargetSumWays(nums, target))
+    # s = "3[a]2[bc]"
+    # # s = "3[a2[c]]"
+    # # a = [0]
+    # # a = 5
+    # # a = 0
+    # print(Solutions_LeetCode().decodeString(s))
 
+    # # TimeMap
+    # cmds = ["set","get","get","set","get","get"]
+    # vals = [["foo","bar",1],["foo",1],["foo",3],["foo","bar2",4],["foo",4],["foo",5]]
+    # time_map = Solutions_LeetCode.TimeMap()
+    # for c, v in zip(cmds, vals):
+    #     print(c, v)
+    #     if c == 'set':
+    #         time_map.set(v[0], v[1], v[2])
+    #     elif c == 'get':
+    #         print(time_map.get(v[0], v[1]))
+    #     print('-----------------')
+
+    # a = "[a[c]2]3"
+    # print(Solutions_LeetCode().decodeString(a))
 
 if __name__ == "__main__":
     main()
